@@ -268,8 +268,8 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 
 | Fase | Entregável | Status |
 |---|---|---|
-| 1 | Fundação: projeto, auth, schema completo (DDL), hierarquia, RBAC, sidebar/topbar, Home básica | **em andamento nesta sessão** |
-| 2 | Tarefas (CRUD, subtarefas, comentários, responsáveis, prioridade/status, filtros) | planejado |
+| 1 | Fundação: projeto, auth, schema completo (DDL), hierarquia, RBAC, sidebar/topbar, Home básica | **concluída** |
+| 2 | Tarefas (CRUD, subtarefas, comentários, responsáveis, prioridade/status, filtros) | **concluída (TDD)** |
 | 3 | Projetos (CRUD, fases, membros, progresso) | planejado |
 | 4 | Views: Lista, Kanban, Calendário, Gantt | planejado |
 | 5 | Notas (páginas, blocos, rich text) | planejado |

@@ -4,13 +4,17 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fase 1 — Fundação.** Autenticação, hierarquia organizacional,
-RBAC, layout (sidebar/topbar/command palette) e uma Home adaptativa por papel
-estão funcionais ponta a ponta contra o schema real. As demais fases (tarefas,
-projetos, views, notas, gestão, automação, integrações Microsoft, ideias) têm
-o **schema de banco e RLS já definidos** (`supabase/migrations/`), mas a UI
-ainda não foi construída — as rotas existem como placeholders honestos que
-dizem em qual fase serão implementadas, em vez de simular funcionalidade.
+**Status atual: Fases 1 e 2 concluídas.** Autenticação, hierarquia
+organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
+adaptativa por papel (Fase 1) e o módulo de Tarefas — CRUD, subtarefas,
+comentários, múltiplos responsáveis, prioridade/status editáveis inline e
+filtros (Fase 2) — estão funcionais ponta a ponta contra o schema real, e a
+lógica de negócio de tarefas foi desenvolvida com TDD (`npm run test`). As
+demais fases (projetos, views, notas, gestão, automação, integrações
+Microsoft, ideias) têm o **schema de banco e RLS já definidos**
+(`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
+existem como placeholders honestos que dizem em qual fase serão
+implementadas, em vez de simular funcionalidade.
 
 ## Stack
 
@@ -78,6 +82,8 @@ npm run dev        # servidor de desenvolvimento
 npm run build       # typecheck + build de produção
 npm run typecheck   # apenas typecheck
 npm run lint         # eslint
+npm run test         # roda a suíte de testes (Vitest) uma vez
+npm run test:watch   # Vitest em modo watch, para desenvolvimento TDD
 npm run preview     # servir o build de produção localmente
 ```
 
@@ -93,6 +99,7 @@ src/repositories/ acesso a dados (Supabase), 1 arquivo por entidade
 src/permissions/  RBAC client-side (apenas UX — a decisão real é RLS)
 src/components/ui/ design system (estilo shadcn/ui)
 src/types/        tipos de domínio (espelham supabase/migrations/*.sql)
+src/test/         infraestrutura de teste (setup do Vitest, mock do Supabase)
 supabase/migrations/  DDL versionado + RLS
 supabase/seed.sql      dados de desenvolvimento
 ```
@@ -109,6 +116,25 @@ O acesso é decidido duas vezes por desenho (defesa em profundidade):
 Detalhes da estratégia de escopo hierárquico (gerência → coordenação → equipe)
 e os helpers `SECURITY DEFINER` usados para evitar recursão de política estão
 em `docs/architecture.md` seção 6.
+
+## Testes
+
+O módulo de Tarefas (Fase 2) foi desenvolvido com TDD: para cada função de
+negócio ou componente, primeiro o teste foi escrito e confirmado vermelho
+(rodando de verdade, não só lido), depois a implementação mínima para ficar
+verde, com refatoração ao final de cada ciclo. Cobertura atual:
+
+- `src/features/tasks/taskLogic.test.ts` — regras puras (agrupamento por
+  prazo, cálculo de progresso a partir de subtarefas, ordenação, filtros).
+- `src/repositories/taskRepository.test.ts` — CRUD de tarefas, responsáveis,
+  comentários e subtarefas contra um mock fiel do query builder do Supabase
+  (`src/test/supabaseMock.ts`), sem tocar rede.
+- `src/pages/Tasks.test.tsx` e `src/features/tasks/TaskDetailPanel.test.tsx` —
+  comportamento de UI (filtros, criação rápida, edição inline de status,
+  subtarefas/comentários/responsáveis) com Testing Library.
+
+Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
+desenvolvimento de uma nova fase.
 
 ## Login de desenvolvimento
 

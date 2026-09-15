@@ -5,13 +5,11 @@ import {
   HelpCircle,
   LayoutDashboard,
   Lightbulb,
-  ListTodo,
   StickyNote,
   Users,
 } from "lucide-react";
 import { ComingSoon } from "@/components/ComingSoon";
 
-export const TasksPage = () => <ComingSoon icon={ListTodo} title="Tarefas" phase="Fase 2" />;
 export const ProjectsPage = () => <ComingSoon icon={FolderKanban} title="Projetos" phase="Fase 3" />;
 export const CalendarPage = () => <ComingSoon icon={Calendar} title="Calendário" phase="Fase 4" />;
 export const NotesPage = () => <ComingSoon icon={StickyNote} title="Notas" phase="Fase 5" />;

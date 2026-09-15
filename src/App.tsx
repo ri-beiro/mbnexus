@@ -7,6 +7,7 @@ import { AppLayout } from "@/app/layout/AppLayout";
 import { Login } from "@/pages/Login";
 import { Home } from "@/pages/Home";
 import { Settings } from "@/pages/Settings";
+import { Tasks } from "@/pages/Tasks";
 import {
   CalendarPage,
   DashboardsPage,
@@ -15,7 +16,6 @@ import {
   NotesPage,
   ProjectsPage,
   ReportsPage,
-  TasksPage,
   TeamPage,
 } from "@/pages/placeholders";
 
@@ -35,7 +35,7 @@ export default function App() {
                 }
               >
                 <Route path="/home" element={<Home />} />
-                <Route path="/tasks" element={<TasksPage />} />
+                <Route path="/tasks" element={<Tasks />} />
                 <Route path="/projects" element={<ProjectsPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/notes" element={<NotesPage />} />

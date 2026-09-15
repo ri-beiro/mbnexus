@@ -187,6 +187,16 @@ export interface TaskAssignee {
   assigned_at: string;
 }
 
+export interface TaskComment {
+  id: string;
+  task_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  edited: boolean;
+}
+
 export interface Notification {
   id: string;
   organization_id: string;

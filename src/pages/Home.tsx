@@ -2,40 +2,19 @@ import { AlertTriangle, CheckCircle2, FolderKanban, ListTodo, ShieldAlert } from
 import { useAuth } from "@/features/auth/useAuth";
 import { useHomeData } from "@/features/home/useHomeData";
 import { isManagementRole } from "@/permissions/types";
+import { classifyTasksByDueDate } from "@/features/tasks/taskLogic";
+import { PRIORITY_BADGE_VARIANT } from "@/features/tasks/taskLabels";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import type { MyTask } from "@/repositories/taskRepository";
-import type { TaskPriority } from "@/types/database";
-
-const PRIORITY_VARIANT: Record<TaskPriority, "secondary" | "default" | "warning" | "destructive"> = {
-  baixa: "secondary",
-  normal: "secondary",
-  alta: "default",
-  urgente: "warning",
-  critica: "destructive",
-};
 
 function greeting(): string {
   const hour = new Date().getHours();
   if (hour < 12) return "Bom dia";
   if (hour < 18) return "Boa tarde";
   return "Boa noite";
-}
-
-function classifyTasks(tasks: MyTask[]) {
-  const today = new Date().toISOString().slice(0, 10);
-  const in7Days = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
-
-  const completed = tasks.filter((t) => t.status === "concluido");
-  const pending = tasks.filter((t) => t.status !== "concluido");
-  const overdue = pending.filter((t) => t.due_date && t.due_date < today);
-  const dueToday = pending.filter((t) => t.due_date === today);
-  const thisWeek = pending.filter((t) => t.due_date && t.due_date > today && t.due_date <= in7Days);
-  const upcoming = pending.filter((t) => !t.due_date || t.due_date > in7Days);
-
-  return { overdue, dueToday, thisWeek, upcoming, completed };
 }
 
 function TaskRow({ task }: { task: MyTask }) {
@@ -47,7 +26,7 @@ function TaskRow({ task }: { task: MyTask }) {
       </div>
       <div className="flex shrink-0 items-center gap-2">
         {task.due_date && <span className="text-xs text-muted-foreground">{task.due_date}</span>}
-        <Badge variant={PRIORITY_VARIANT[task.priority]}>{task.priority}</Badge>
+        <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]}>{task.priority}</Badge>
       </div>
     </li>
   );
@@ -116,7 +95,7 @@ export function Home() {
     );
   }
 
-  const groups = classifyTasks(data?.myTasks ?? []);
+  const groups = classifyTasksByDueDate(data?.myTasks ?? [], new Date().toISOString().slice(0, 10));
   const firstName = profile?.full_name.split(" ")[0] ?? "";
 
   return (
