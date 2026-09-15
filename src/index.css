@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 20% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 20% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 20% 12%;
+
+    --primary: 245 75% 59%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 220 20% 96%;
+    --secondary-foreground: 222 20% 16%;
+
+    --muted: 220 20% 96%;
+    --muted-foreground: 222 10% 45%;
+
+    --accent: 245 75% 96%;
+    --accent-foreground: 245 75% 30%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 60% 36%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 32 20% 14%;
+
+    --border: 220 18% 90%;
+    --input: 220 18% 90%;
+    --ring: 245 75% 59%;
+
+    --sidebar: 222 25% 10%;
+    --sidebar-foreground: 220 20% 88%;
+    --sidebar-border: 222 20% 18%;
+    --sidebar-accent: 222 20% 16%;
+
+    --radius: 0.625rem;
+  }
+
+  [data-theme="dark"] {
+    --background: 222 24% 8%;
+    --foreground: 220 20% 92%;
+
+    --card: 222 22% 11%;
+    --card-foreground: 220 20% 92%;
+
+    --popover: 222 22% 11%;
+    --popover-foreground: 220 20% 92%;
+
+    --primary: 245 80% 68%;
+    --primary-foreground: 222 24% 8%;
+
+    --secondary: 222 18% 16%;
+    --secondary-foreground: 220 20% 92%;
+
+    --muted: 222 18% 16%;
+    --muted-foreground: 220 10% 62%;
+
+    --accent: 245 40% 20%;
+    --accent-foreground: 245 80% 85%;
+
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 152 50% 45%;
+    --success-foreground: 0 0% 100%;
+
+    --warning: 38 85% 55%;
+    --warning-foreground: 32 20% 10%;
+
+    --border: 222 18% 18%;
+    --input: 222 18% 18%;
+    --ring: 245 80% 68%;
+
+    --sidebar: 222 28% 6%;
+    --sidebar-foreground: 220 20% 88%;
+    --sidebar-border: 222 20% 14%;
+    --sidebar-accent: 222 20% 12%;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --background: 222 24% 8%;
+      --foreground: 220 20% 92%;
+      --card: 222 22% 11%;
+      --card-foreground: 220 20% 92%;
+      --popover: 222 22% 11%;
+      --popover-foreground: 220 20% 92%;
+      --primary: 245 80% 68%;
+      --primary-foreground: 222 24% 8%;
+      --secondary: 222 18% 16%;
+      --secondary-foreground: 220 20% 92%;
+      --muted: 222 18% 16%;
+      --muted-foreground: 220 10% 62%;
+      --accent: 245 40% 20%;
+      --accent-foreground: 245 80% 85%;
+      --destructive: 0 65% 55%;
+      --destructive-foreground: 0 0% 100%;
+      --success: 152 50% 45%;
+      --success-foreground: 0 0% 100%;
+      --warning: 38 85% 55%;
+      --warning-foreground: 32 20% 10%;
+      --border: 222 18% 18%;
+      --input: 222 18% 18%;
+      --ring: 245 80% 68%;
+      --sidebar: 222 28% 6%;
+      --sidebar-foreground: 220 20% 88%;
+      --sidebar-border: 222 20% 14%;
+      --sidebar-accent: 222 20% 12%;
+    }
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+}
