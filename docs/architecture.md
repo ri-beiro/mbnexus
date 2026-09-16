@@ -274,7 +274,7 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 | 4 | Views: Lista, Kanban, Calendário, Gantt | **concluída (TDD)** |
 | 5 | Notas (páginas, blocos, rich text) | **concluída (TDD)** |
 | 6 | Gestão: workload, dashboards, relatórios | **concluída (TDD)** |
-| 7 | Automação: regras, notificações, e-mail, recorrência | planejado |
+| 7 | Automação: regras, notificações, e-mail, recorrência | **concluída (TDD)** — Edge Functions escritas mas não verificadas (sem runtime Deno/segredos reais no ambiente de build; ver `supabase/functions/README.md`) |
 | 8 | Integrações Microsoft (Graph/Teams/Outlook) + SMTP Locaweb | planejado |
 | 9 | Central de Ideias / melhoria contínua | **concluída (TDD)** |
 

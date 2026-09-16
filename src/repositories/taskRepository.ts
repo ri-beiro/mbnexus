@@ -51,6 +51,7 @@ export interface UpdateTaskInput {
   startDate?: string | null;
   dueDate?: string | null;
   progress?: number;
+  recurrenceRule?: string | null;
 }
 
 const UPDATE_TASK_KEYS: Record<keyof UpdateTaskInput, string> = {
@@ -61,6 +62,7 @@ const UPDATE_TASK_KEYS: Record<keyof UpdateTaskInput, string> = {
   startDate: "start_date",
   dueDate: "due_date",
   progress: "progress",
+  recurrenceRule: "recurrence_rule",
 };
 
 export async function updateTask(taskId: string, patch: UpdateTaskInput): Promise<void> {

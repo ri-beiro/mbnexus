@@ -193,7 +193,9 @@ export function Tasks() {
                       currentProfileId={profile.id}
                       profiles={profiles}
                       assigneeIds={task.assigneeIds}
+                      recurrenceRule={task.recurrence_rule}
                       onAssigneesChange={() => reload()}
+                      onRecurrenceChange={() => reload()}
                     />
                   </div>
                 )}

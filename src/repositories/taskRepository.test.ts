@@ -74,6 +74,24 @@ describe("updateTask", () => {
     expect(mock.update).toHaveBeenCalledWith({ status: "em_andamento", priority: "alta" });
     expect(mock.eq).toHaveBeenCalledWith("id", "t1");
   });
+
+  it("updates the recurrence rule", async () => {
+    const mock = createChainableMock({ data: null, error: null });
+    from.mockReturnValue(mock as never);
+
+    await updateTask("t1", { recurrenceRule: "weekly:MON" });
+
+    expect(mock.update).toHaveBeenCalledWith({ recurrence_rule: "weekly:MON" });
+  });
+
+  it("clears the recurrence rule by setting it to null", async () => {
+    const mock = createChainableMock({ data: null, error: null });
+    from.mockReturnValue(mock as never);
+
+    await updateTask("t1", { recurrenceRule: null });
+
+    expect(mock.update).toHaveBeenCalledWith({ recurrence_rule: null });
+  });
 });
 
 describe("deleteTask", () => {

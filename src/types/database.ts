@@ -305,6 +305,66 @@ export interface IdeaComment {
   created_at: string;
 }
 
+export interface NotificationPreference {
+  profile_id: string;
+  in_app_enabled: boolean;
+  email_enabled: boolean;
+  updated_at: string;
+}
+
+export interface Automation {
+  id: string;
+  organization_id: string;
+  name: string;
+  description: string | null;
+  trigger_event: string;
+  condition: Record<string, unknown>;
+  action: Record<string, unknown>;
+  is_active: boolean;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type AutomationRunStatus = "success" | "failed" | "skipped";
+
+export interface AutomationRun {
+  id: string;
+  automation_id: string;
+  entity_type: string;
+  entity_id: string;
+  status: AutomationRunStatus;
+  detail: string | null;
+  ran_at: string;
+}
+
+export interface EmailTemplate {
+  id: string;
+  organization_id: string;
+  key: string;
+  subject: string;
+  body_html: string;
+  updated_at: string;
+}
+
+export type EmailQueueStatus = "pending" | "sending" | "sent" | "failed";
+
+export interface EmailQueueItem {
+  id: string;
+  organization_id: string;
+  template_id: string | null;
+  recipient_email: string;
+  recipient_profile_id: string | null;
+  subject: string;
+  body_html: string;
+  status: EmailQueueStatus;
+  attempts: number;
+  last_error: string | null;
+  provider: string | null;
+  created_at: string;
+  sent_at: string | null;
+}
+
 // Generic row/insert/update helpers keep repositories terse without a full
 // codegen'd Database type. Swap for `supabase gen types` output when a real
 // project is linked; the shape (Tables<T>) stays the same either way.
@@ -338,6 +398,11 @@ export interface Database {
       notes: Table<Note>;
       note_blocks: Table<NoteBlock>;
       notifications: Table<Notification>;
+      notification_preferences: Table<NotificationPreference>;
+      automations: Table<Automation>;
+      automation_runs: Table<AutomationRun>;
+      email_templates: Table<EmailTemplate>;
+      email_queue: Table<EmailQueueItem>;
       ideas: Table<Idea>;
       idea_comments: Table<IdeaComment>;
     };

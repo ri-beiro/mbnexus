@@ -6,16 +6,15 @@ import { useAuth } from "@/features/auth/useAuth";
 import { ROLE_LABELS } from "@/permissions/types";
 import { HierarchyTree } from "@/features/hierarchy/HierarchyTree";
 import { UsersPanel } from "@/features/hierarchy/UsersPanel";
+import { NotificationPreferencesPanel } from "@/features/notifications/NotificationPreferencesPanel";
+import { AutomationsPanel } from "@/features/automation/AutomationsPanel";
+import { EmailTemplatesPanel } from "@/features/automation/EmailTemplatesPanel";
 
 const FUTURE_SECTIONS = [
-  "Notificações",
-  "E-mail",
   "Integrações (Microsoft 365 / Teams / Outlook)",
   "Permissões avançadas",
   "Status personalizados",
   "Tags",
-  "Automação",
-  "Templates",
   "Auditoria",
 ];
 
@@ -34,6 +33,9 @@ export function Settings() {
           <TabsTrigger value="profile">Meu perfil</TabsTrigger>
           <TabsTrigger value="hierarchy">Hierarquia</TabsTrigger>
           <TabsTrigger value="users">Usuários</TabsTrigger>
+          <TabsTrigger value="notifications">Notificações</TabsTrigger>
+          <TabsTrigger value="automation">Automação</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="future">Próximas fases</TabsTrigger>
         </TabsList>
 
@@ -74,6 +76,42 @@ export function Settings() {
             </CardHeader>
             <CardContent>
               <UsersPanel />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notifications">
+          <Card>
+            <CardHeader>
+              <CardTitle>Preferências de notificação</CardTitle>
+              <CardDescription>Escolha como você quer ser avisado sobre tarefas e automações.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <NotificationPreferencesPanel />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="automation">
+          <Card>
+            <CardHeader>
+              <CardTitle>Automações</CardTitle>
+              <CardDescription>Regras que disparam ações (ex.: e-mail) quando uma condição é atendida.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <AutomationsPanel />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="templates">
+          <Card>
+            <CardHeader>
+              <CardTitle>Modelos de e-mail</CardTitle>
+              <CardDescription>Assunto e corpo usados pelas automações e notificações por e-mail.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <EmailTemplatesPanel />
             </CardContent>
           </Card>
         </TabsContent>

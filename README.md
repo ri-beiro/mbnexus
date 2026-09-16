@@ -4,7 +4,7 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–6 e 9 concluídas (falta 7 e 8).** Autenticação,
+**Status atual: Fases 1–7 e 9 concluídas (falta 8).** Autenticação,
 hierarquia organizacional, RBAC, layout (sidebar/topbar/command palette) e
 uma Home adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD,
 subtarefas, comentários, múltiplos responsáveis, prioridade/status
@@ -19,22 +19,33 @@ carga de trabalho calculada e classificada (baixa/normal/elevada/sobrecarga),
 Dashboards com indicadores e gráficos (Recharts) em tempo real, e Relatórios
 de produtividade com exportação CSV (Fase 6); e a **Central de Ideias** —
 pipeline de 7 etapas (seção 20), registro rápido, avanço de etapa e
-transformação de uma ideia aprovada em projeto de verdade (Fase 9) — estão
-prontos. Nenhuma view duplica dados: todas leem e escrevem através dos
-mesmos `src/repositories/taskRepository.ts` / `projectRepository.ts` /
-`eventRepository.ts` / `noteRepository.ts` / `ideaRepository.ts`. O Gantt lê
-o progresso e as dependências (`task_dependencies`) de cada tarefa e
-permite editar início/fim por um campo de data acessível em cada linha
-(arrastar-e-soltar para redimensionar a barra fica para uma iteração
-futura — documentado como tal, não fingido). Toda a lógica de negócio e a
-maior parte da UI foram desenvolvidas com TDD (`npm run test`). Faltam as
-Fases 7 (automação/e-mail) e 8 (integrações Microsoft) — o **schema de
-banco e RLS já estão definidos** (`supabase/migrations/`), mas a UI e as
-Edge Functions ainda não foram construídas; essas duas fases dependem de
-segredos e serviços reais (SMTP, OAuth Microsoft) que só se validam por
-completo com você conectando credenciais de verdade — as rotas existem
-como placeholders honestos que dizem em qual fase serão implementadas, em
-vez de simular funcionalidade.
+transformação de uma ideia aprovada em projeto de verdade (Fase 9); e a
+**Automação/E-mail** — recorrência de tarefas (`recurrence_rule`, com um
+seletor de presets no detalhe da tarefa), central de notificações no topbar
+com preferências por usuário, e as telas de Automações/Templates de e-mail em
+Configurações, que gravam de verdade em `automations`/`email_templates`
+(Fase 7) — estão prontos. Nenhuma view duplica dados: todas leem e escrevem
+através dos mesmos `src/repositories/taskRepository.ts` / `projectRepository.ts` /
+`eventRepository.ts` / `noteRepository.ts` / `ideaRepository.ts` /
+`notificationRepository.ts` / `automationRepository.ts` /
+`emailTemplateRepository.ts`. O Gantt lê o progresso e as dependências
+(`task_dependencies`) de cada tarefa e permite editar início/fim por um campo
+de data acessível em cada linha (arrastar-e-soltar para redimensionar a
+barra fica para uma iteração futura — documentado como tal, não fingido).
+Toda a lógica de negócio e a maior parte da UI foram desenvolvidas com TDD
+(`npm run test`). A Fase 7 tem uma parte que **não** foi (e não podia ser)
+validada nesta sessão: as duas Edge Functions em `supabase/functions/`
+(`automations` e `process-email-queue`, que de fato disparam e-mails via
+Microsoft Graph/SMTP Locaweb) foram escritas com cuidado mas exigem um
+runtime Deno real e segredos reais para rodar — o sandbox não tem nenhum dos
+dois (a instalação do Deno foi tentada e bloqueada pelo proxy da rede). Ver
+`supabase/functions/README.md` para o que falta verificar antes de confiar
+nelas em produção. Falta a Fase 8 (integrações Microsoft 365/Teams/Outlook)
+— o **schema de banco e RLS já estão definidos** (`supabase/migrations/`),
+mas a UI ainda não foi construída; essa fase depende de segredos e serviços
+reais (OAuth Microsoft) que só se validam por completo com você conectando
+credenciais de verdade — as rotas existem como placeholders honestos que
+dizem em qual fase serão implementadas, em vez de simular funcionalidade.
 
 ## Stack
 
@@ -122,6 +133,7 @@ src/types/        tipos de domínio (espelham supabase/migrations/*.sql)
 src/test/         infraestrutura de teste (setup do Vitest, mock do Supabase)
 supabase/migrations/  DDL versionado + RLS
 supabase/seed.sql      dados de desenvolvimento
+supabase/functions/    Edge Functions (automação, fila de e-mail — ver README próprio)
 ```
 
 ## Permissões e segurança
@@ -146,7 +158,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (217 testes):
+Cobertura atual (287 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -203,6 +215,30 @@ Cobertura atual (217 testes):
   e a conversão de uma ideia aprovada em projeto real (dois inserts
   sequenciais: cria o projeto, depois vincula `converted_project_id` na
   ideia).
+- `src/features/automation/recurrenceLogic.test.ts` — cálculo da próxima
+  ocorrência para cada formato de regra de recorrência (diária, por
+  intervalo de N dias, semanal por dia(s) da semana com virada de semana,
+  mensal e anual com virada de mês/ano quando o dia já passou).
+- `src/features/automation/conditionLogic.test.ts` — avaliação de
+  `automations.condition` contra uma tarefa para os três gatilhos hoje
+  suportados (prazo próximo, atrasada, todas as subtarefas concluídas),
+  incluindo os filtros comuns de status/prioridade.
+- `src/repositories/notificationRepository.test.ts`,
+  `src/repositories/automationRepository.test.ts` e
+  `src/repositories/emailTemplateRepository.test.ts` — CRUD de
+  notificações/preferências, automações e modelos de e-mail contra o mesmo
+  mock do query builder do Supabase.
+- `src/features/notifications/NotificationCenter.test.tsx` e
+  `src/features/notifications/NotificationPreferencesPanel.test.tsx` — o
+  painel de notificações no topbar (contagem de não lidas, marcar uma/todas
+  como lida, navegar ao clicar) e as preferências por usuário em
+  Configurações.
+- `src/features/automation/AutomationsPanel.test.tsx` e
+  `src/features/automation/EmailTemplatesPanel.test.tsx` — as telas de
+  Automação e Templates em Configurações (criar, ativar/desativar, editar
+  inline, excluir).
+- `src/features/tasks/TaskDetailPanel.test.tsx` (casos de repetição) —
+  o seletor de recorrência no detalhe da tarefa, incluindo limpar a regra.
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.

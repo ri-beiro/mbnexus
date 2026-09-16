@@ -11,6 +11,7 @@ vi.mock("@/repositories/taskRepository", () => ({
   addTaskComment: vi.fn(),
   addTaskAssignee: vi.fn(),
   removeTaskAssignee: vi.fn(),
+  updateTask: vi.fn(),
 }));
 
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
@@ -21,6 +22,7 @@ import {
   listSubtasks,
   listTaskComments,
   removeTaskAssignee,
+  updateTask,
 } from "@/repositories/taskRepository";
 
 const mockListSubtasks = vi.mocked(listSubtasks);
@@ -29,6 +31,7 @@ const mockListTaskComments = vi.mocked(listTaskComments);
 const mockAddTaskComment = vi.mocked(addTaskComment);
 const mockAddTaskAssignee = vi.mocked(addTaskAssignee);
 const mockRemoveTaskAssignee = vi.mocked(removeTaskAssignee);
+const mockUpdateTask = vi.mocked(updateTask);
 
 const PROFILES: Profile[] = [
   {
@@ -90,7 +93,7 @@ function makeComment(overrides: Partial<TaskComment> & { id: string; body: strin
   };
 }
 
-function renderPanel(assigneeIds: string[] = []) {
+function renderPanel(assigneeIds: string[] = [], recurrenceRule: string | null = null) {
   return render(
     <ToastProvider>
       <TaskDetailPanel
@@ -99,6 +102,7 @@ function renderPanel(assigneeIds: string[] = []) {
         currentProfileId="user-1"
         profiles={PROFILES}
         assigneeIds={assigneeIds}
+        recurrenceRule={recurrenceRule}
       />
     </ToastProvider>,
   );
@@ -111,6 +115,7 @@ beforeEach(() => {
   mockAddTaskComment.mockReset();
   mockAddTaskAssignee.mockReset();
   mockRemoveTaskAssignee.mockReset();
+  mockUpdateTask.mockReset();
 });
 
 describe("TaskDetailPanel", () => {
@@ -207,5 +212,51 @@ describe("TaskDetailPanel", () => {
 
     await waitFor(() => expect(mockRemoveTaskAssignee).toHaveBeenCalledWith("t1", "u1"));
     expect(screen.queryByRole("button", { name: /remover João Pedro Silva/i })).not.toBeInTheDocument();
+  });
+
+  it("shows 'não repete' when the task has no recurrence rule", async () => {
+    mockListSubtasks.mockResolvedValue([]);
+    mockListTaskComments.mockResolvedValue([]);
+
+    renderPanel([], null);
+
+    expect(await screen.findByLabelText(/repetição/i)).toHaveValue("");
+  });
+
+  it("shows the current recurrence preset when one is set", async () => {
+    mockListSubtasks.mockResolvedValue([]);
+    mockListTaskComments.mockResolvedValue([]);
+
+    renderPanel([], "weekly:MON");
+
+    expect(await screen.findByLabelText(/repetição/i)).toHaveValue("weekly:MON");
+  });
+
+  it("updates the recurrence rule when a new preset is chosen", async () => {
+    const user = userEvent.setup();
+    mockListSubtasks.mockResolvedValue([]);
+    mockListTaskComments.mockResolvedValue([]);
+    mockUpdateTask.mockResolvedValue(undefined);
+
+    renderPanel([], null);
+    const select = await screen.findByLabelText(/repetição/i);
+
+    await user.selectOptions(select, "daily");
+
+    await waitFor(() => expect(mockUpdateTask).toHaveBeenCalledWith("t1", { recurrenceRule: "daily" }));
+  });
+
+  it("clears the recurrence rule when 'não repete' is chosen again", async () => {
+    const user = userEvent.setup();
+    mockListSubtasks.mockResolvedValue([]);
+    mockListTaskComments.mockResolvedValue([]);
+    mockUpdateTask.mockResolvedValue(undefined);
+
+    renderPanel([], "daily");
+    const select = await screen.findByLabelText(/repetição/i);
+
+    await user.selectOptions(select, "");
+
+    await waitFor(() => expect(mockUpdateTask).toHaveBeenCalledWith("t1", { recurrenceRule: null }));
   });
 });

@@ -20,6 +20,7 @@ export function createChainableMock(result: MockResult = { data: null, error: nu
     "select",
     "insert",
     "update",
+    "upsert",
     "delete",
     "eq",
     "neq",

@@ -7,8 +7,10 @@ import {
   listSubtasks,
   listTaskComments,
   removeTaskAssignee,
+  updateTask,
 } from "@/repositories/taskRepository";
 import { STATUS_LABELS } from "@/features/tasks/taskLabels";
+import { RECURRENCE_PRESETS } from "@/features/automation/recurrenceLogic";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -23,7 +25,9 @@ interface TaskDetailPanelProps {
   currentProfileId: string;
   profiles: Profile[];
   assigneeIds: string[];
+  recurrenceRule?: string | null;
   onAssigneesChange?: (assigneeIds: string[]) => void;
+  onRecurrenceChange?: (rule: string | null) => void;
 }
 
 function profileName(profiles: Profile[], id: string): string {
@@ -36,12 +40,15 @@ export function TaskDetailPanel({
   currentProfileId,
   profiles,
   assigneeIds,
+  recurrenceRule = null,
   onAssigneesChange,
+  onRecurrenceChange,
 }: TaskDetailPanelProps) {
   const { toast } = useToast();
   const [subtasks, setSubtasks] = useState<Task[]>([]);
   const [comments, setComments] = useState<TaskComment[]>([]);
   const [assignees, setAssignees] = useState<string[]>(assigneeIds);
+  const [recurrence, setRecurrence] = useState<string | null>(recurrenceRule);
   const [loading, setLoading] = useState(true);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
   const [newComment, setNewComment] = useState("");
@@ -49,6 +56,7 @@ export function TaskDetailPanel({
 
   useEffect(() => {
     setAssignees(assigneeIds);
+    setRecurrence(recurrenceRule);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [taskId]);
 
@@ -158,6 +166,25 @@ export function TaskDetailPanel({
     }
   }
 
+  async function handleRecurrenceChange(rule: string | null) {
+    const previous = recurrence;
+    setRecurrence(rule);
+    setBusy(true);
+    try {
+      await updateTask(taskId, { recurrenceRule: rule });
+      onRecurrenceChange?.(rule);
+    } catch (err) {
+      setRecurrence(previous);
+      toast({
+        title: "Não foi possível atualizar a repetição",
+        description: err instanceof Error ? err.message : undefined,
+        variant: "destructive",
+      });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="space-y-2 border-t pt-3">
@@ -208,6 +235,22 @@ export function TaskDetailPanel({
                 {p.full_name}
               </option>
             ))}
+        </select>
+
+        <h4 className="mt-4 text-xs font-semibold uppercase text-muted-foreground">Repetição</h4>
+        <select
+          aria-label="Repetição"
+          value={recurrence ?? ""}
+          disabled={busy}
+          onChange={(e) => handleRecurrenceChange(e.target.value || null)}
+          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+        >
+          <option value="">Não repete</option>
+          {RECURRENCE_PRESETS.map((preset) => (
+            <option key={preset.rule} value={preset.rule}>
+              {preset.label}
+            </option>
+          ))}
         </select>
 
         <h4 className="mt-4 text-xs font-semibold uppercase text-muted-foreground">Subtarefas</h4>

@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { Bell, Calendar, HelpCircle, LogOut, Plus, Search, Settings, User } from "lucide-react";
+import { Calendar, HelpCircle, LogOut, Plus, Search, Settings, User } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { ROLE_LABELS } from "@/permissions/types";
 import { Button } from "@/components/ui/button";
@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { CommandPalette, useCommandPalette } from "@/app/layout/CommandPalette";
-import { useNotificationsBadge } from "@/features/notifications/useNotificationsBadge";
+import { NotificationCenter } from "@/features/notifications/NotificationCenter";
 
 function initials(name: string) {
   return name
@@ -36,7 +36,6 @@ export function Topbar() {
   const { profile, primaryRole, signOut } = useAuth();
   const navigate = useNavigate();
   const palette = useCommandPalette();
-  const unreadCount = useNotificationsBadge();
 
   return (
     <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
@@ -71,14 +70,7 @@ export function Topbar() {
         <Calendar className="h-4 w-4" />
       </Button>
 
-      <Button variant="ghost" size="icon" className="relative" aria-label="Notificações">
-        <Bell className="h-4 w-4" />
-        {unreadCount > 0 && (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </Button>
+      <NotificationCenter />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
