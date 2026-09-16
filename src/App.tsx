@@ -12,11 +12,11 @@ import { Kanban } from "@/pages/Kanban";
 import { Projects } from "@/pages/Projects";
 import { Calendar } from "@/pages/Calendar";
 import { Gantt } from "@/pages/Gantt";
+import { Notes } from "@/pages/Notes";
 import {
   DashboardsPage,
   HelpPage,
   IdeasPage,
-  NotesPage,
   ReportsPage,
   TeamPage,
 } from "@/pages/placeholders";
@@ -42,7 +42,7 @@ export default function App() {
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/gantt" element={<Gantt />} />
-                <Route path="/notes" element={<NotesPage />} />
+                <Route path="/notes" element={<Notes />} />
                 <Route path="/ideas" element={<IdeasPage />} />
                 <Route path="/dashboards" element={<DashboardsPage />} />
                 <Route path="/team" element={<TeamPage />} />

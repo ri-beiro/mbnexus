@@ -4,25 +4,28 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–4 concluídas.** Autenticação, hierarquia
+**Status atual: Fases 1–5 concluídas.** Autenticação, hierarquia
 organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
 adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
 comentários, múltiplos responsáveis, prioridade/status editáveis inline e
 filtros (Fase 2); o módulo de Projetos — CRUD, fases, membros e progresso
-calculado automaticamente a partir das tarefas vinculadas (Fase 3); e as
+calculado automaticamente a partir das tarefas vinculadas (Fase 3); as
 quatro views sobre essa mesma tarefa — **Lista, Kanban, Calendário e
-Gantt** (Fase 4) — estão prontas. Nenhuma view duplica dados: todas leem e
+Gantt** (Fase 4); e o módulo de **Notas** — páginas e subpáginas em árvore,
+blocos (parágrafo, título, código, checklist com itens marcáveis), e
+salvamento automático com indicador "Salvo"/"Salvando..."/"Alterações não
+salvas" (Fase 5) — estão prontos. Nenhuma view duplica dados: todas leem e
 escrevem através dos mesmos `src/repositories/taskRepository.ts` /
-`projectRepository.ts` / `eventRepository.ts`. O Gantt lê o progresso e as
-dependências (`task_dependencies`) de cada tarefa e permite editar
-início/fim por um campo de data acessível em cada linha (arrastar-e-soltar
-para redimensionar a barra fica para uma iteração futura — documentado como
-tal, não fingido). Toda a lógica de negócio e a maior parte da UI foram
-desenvolvidas com TDD (`npm run test`). As demais fases (notas, gestão,
-automação, integrações Microsoft, ideias) têm o **schema de banco e RLS já
-definidos** (`supabase/migrations/`), mas a UI ainda não foi construída —
-as rotas existem como placeholders honestos que dizem em qual fase serão
-implementadas, em vez de simular funcionalidade.
+`projectRepository.ts` / `eventRepository.ts` / `noteRepository.ts`. O
+Gantt lê o progresso e as dependências (`task_dependencies`) de cada tarefa
+e permite editar início/fim por um campo de data acessível em cada linha
+(arrastar-e-soltar para redimensionar a barra fica para uma iteração
+futura — documentado como tal, não fingido). Toda a lógica de negócio e a
+maior parte da UI foram desenvolvidas com TDD (`npm run test`). As demais
+fases (gestão, automação, integrações Microsoft, ideias) têm o **schema de
+banco e RLS já definidos** (`supabase/migrations/`), mas a UI ainda não foi
+construída — as rotas existem como placeholders honestos que dizem em qual
+fase serão implementadas, em vez de simular funcionalidade.
 
 ## Stack
 
@@ -134,7 +137,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (134 testes):
+Cobertura atual (172 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -164,6 +167,17 @@ Cobertura atual (134 testes):
   posição/largura de cada barra em dias), exibição de dependências
   (`task_dependencies`), seleção de projeto e edição de início/fim por
   tarefa.
+- `src/features/notes/noteLogic.test.ts` — montagem da árvore de páginas
+  (aninhamento por `parent_note_id`, notas arquivadas excluídas mas nunca
+  "perdidas" quando o pai é arquivado).
+- `src/features/notes/useAutosave.test.ts` — o hook de salvamento
+  automático debounced com timers falsos (`vi.useFakeTimers`), incluindo o
+  caso de falha (o indicador volta para "não salvo", nunca mente dizendo
+  "salvo" quando a escrita falhou).
+- `src/repositories/noteRepository.test.ts`, `src/features/notes/NoteTree.test.tsx`,
+  `src/features/notes/NoteEditor.test.tsx` e `src/pages/Notes.test.tsx` —
+  CRUD de páginas/blocos, navegação na árvore, edição de blocos (salva ao
+  perder o foco) e do checklist (salva ao marcar um item).
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.

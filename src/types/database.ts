@@ -230,6 +230,42 @@ export interface EventAttendee {
   response: "pending" | "accepted" | "declined" | "tentative";
 }
 
+export interface Note {
+  id: string;
+  organization_id: string;
+  owner_profile_id: string;
+  parent_note_id: string | null;
+  project_id: string | null;
+  title: string;
+  icon: string | null;
+  position: number;
+  is_archived: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export type NoteBlockType =
+  | "paragraph"
+  | "heading"
+  | "bulleted_list"
+  | "numbered_list"
+  | "checklist"
+  | "table"
+  | "code"
+  | "image"
+  | "link"
+  | "attachment";
+
+export interface NoteBlock {
+  id: string;
+  note_id: string;
+  type: NoteBlockType;
+  content: Record<string, unknown>;
+  position: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Notification {
   id: string;
   organization_id: string;
@@ -291,6 +327,8 @@ export interface Database {
       task_comments: Table<TaskComment>;
       events: Table<Event>;
       event_attendees: Table<EventAttendee>;
+      notes: Table<Note>;
+      note_blocks: Table<NoteBlock>;
       notifications: Table<Notification>;
       ideas: Table<Idea>;
     };
