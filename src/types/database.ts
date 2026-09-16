@@ -197,6 +197,32 @@ export interface TaskComment {
   edited: boolean;
 }
 
+export type EventType = "event" | "meeting" | "deadline";
+
+export interface Event {
+  id: string;
+  organization_id: string;
+  title: string;
+  description: string | null;
+  type: EventType;
+  starts_at: string;
+  ends_at: string;
+  location: string | null;
+  project_id: string | null;
+  task_id: string | null;
+  created_by: string;
+  teams_meeting_id: string | null;
+  teams_join_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EventAttendee {
+  event_id: string;
+  profile_id: string;
+  response: "pending" | "accepted" | "declined" | "tentative";
+}
+
 export interface Notification {
   id: string;
   organization_id: string;
@@ -255,6 +281,9 @@ export interface Database {
       project_members: Table<ProjectMember>;
       tasks: Table<Task>;
       task_assignees: Table<TaskAssignee>;
+      task_comments: Table<TaskComment>;
+      events: Table<Event>;
+      event_attendees: Table<EventAttendee>;
       notifications: Table<Notification>;
       ideas: Table<Idea>;
     };

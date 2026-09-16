@@ -10,8 +10,8 @@ import { Settings } from "@/pages/Settings";
 import { Tasks } from "@/pages/Tasks";
 import { Kanban } from "@/pages/Kanban";
 import { Projects } from "@/pages/Projects";
+import { Calendar } from "@/pages/Calendar";
 import {
-  CalendarPage,
   DashboardsPage,
   HelpPage,
   IdeasPage,
@@ -39,7 +39,7 @@ export default function App() {
                 <Route path="/tasks" element={<Tasks />} />
                 <Route path="/kanban" element={<Kanban />} />
                 <Route path="/projects" element={<Projects />} />
-                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/calendar" element={<Calendar />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/ideas" element={<IdeasPage />} />
                 <Route path="/dashboards" element={<DashboardsPage />} />

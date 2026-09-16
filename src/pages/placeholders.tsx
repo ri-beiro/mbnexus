@@ -1,6 +1,5 @@
 import {
   BarChart3,
-  Calendar,
   HelpCircle,
   LayoutDashboard,
   Lightbulb,
@@ -9,7 +8,6 @@ import {
 } from "lucide-react";
 import { ComingSoon } from "@/components/ComingSoon";
 
-export const CalendarPage = () => <ComingSoon icon={Calendar} title="Calendário" phase="Fase 4" />;
 export const NotesPage = () => <ComingSoon icon={StickyNote} title="Notas" phase="Fase 5" />;
 export const IdeasPage = () => <ComingSoon icon={Lightbulb} title="Central de Ideias" phase="Fase 9" />;
 export const DashboardsPage = () => <ComingSoon icon={LayoutDashboard} title="Dashboards" phase="Fase 6" />;

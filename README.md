@@ -10,12 +10,14 @@ palette) e uma Home adaptativa por papel (Fase 1); o módulo de Tarefas —
 CRUD, subtarefas, comentários, múltiplos responsáveis, prioridade/status
 editáveis inline e filtros (Fase 2); o módulo de Projetos — CRUD, fases,
 membros e progresso calculado automaticamente a partir das tarefas
-vinculadas (Fase 3); e agora um **board Kanban** com drag-and-drop entre
-colunas de status (Fase 4, parcial) — todos consomem a mesma entidade de
-tarefa via `src/repositories/taskRepository.ts`, sem duplicar dados entre a
-Lista e o Kanban. Toda a lógica de negócio e a maior parte da UI foram
-desenvolvidas com TDD (`npm run test`). Ainda faltam da Fase 4: Calendário e
-Gantt. As demais fases (notas, gestão, automação, integrações Microsoft,
+vinculadas (Fase 3); e um **board Kanban** e um **Calendário mensal**
+(Fase 4, parcial) — o Kanban reusa a mesma entidade de tarefa da Lista
+(`src/repositories/taskRepository.ts`), e o Calendário mostra tarefas
+(pelo prazo) e eventos/reuniões/prazos (`src/repositories/eventRepository.ts`)
+juntos, com arrastar-e-soltar para mudar a data de qualquer um dos dois —
+nenhuma view duplica dados. Toda a lógica de negócio e a maior parte da UI
+foram desenvolvidas com TDD (`npm run test`). Ainda falta da Fase 4: Gantt.
+As demais fases (notas, gestão, automação, integrações Microsoft,
 ideias) têm o **schema de banco e RLS já definidos**
 (`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
 existem como placeholders honestos que dizem em qual fase serão
@@ -131,7 +133,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (92 testes):
+Cobertura atual (116 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -150,6 +152,12 @@ Cobertura atual (92 testes):
   testados via um `<select>` acessível em cada card (o arrastar-e-soltar em
   si com dnd-kit é um teste manual/visual — simular a física real de um
   drag por ponteiro no jsdom não tem valor de sinal).
+- `src/features/calendar/calendarLogic.test.ts`, `src/repositories/eventRepository.test.ts`,
+  `src/features/calendar/CalendarGrid.test.tsx` e `src/pages/Calendar.test.tsx`
+  — grade mensal, mistura de tarefas/eventos por dia, e o deslocamento de
+  data (preservando horário e duração de um evento) testado via um
+  `<input type="date">` acessível por item, incluindo o roteamento correto
+  entre `updateTask` (para uma tarefa) e `updateEvent` (para um evento).
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.
