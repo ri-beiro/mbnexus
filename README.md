@@ -4,32 +4,37 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–6 concluídas.** Autenticação, hierarquia
-organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
-adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
-comentários, múltiplos responsáveis, prioridade/status editáveis inline e
-filtros (Fase 2); o módulo de Projetos — CRUD, fases, membros e progresso
-calculado automaticamente a partir das tarefas vinculadas (Fase 3); as
-quatro views sobre essa mesma tarefa — **Lista, Kanban, Calendário e
-Gantt** (Fase 4); o módulo de **Notas** — páginas e subpáginas em árvore,
-blocos (parágrafo, título, código, checklist com itens marcáveis), e
-salvamento automático com indicador "Salvo"/"Salvando..."/"Alterações não
-salvas" (Fase 5); e a camada de **Gestão** — Minha Equipe com carga de
-trabalho calculada e classificada (baixa/normal/elevada/sobrecarga),
-Dashboards com indicadores e gráficos (Recharts) em tempo real, e
-Relatórios de produtividade com exportação CSV (Fase 6) — estão prontos.
-Nenhuma view duplica dados: todas leem e escrevem através dos mesmos
-`src/repositories/taskRepository.ts` / `projectRepository.ts` /
-`eventRepository.ts` / `noteRepository.ts`. O Gantt lê o progresso e as
-dependências (`task_dependencies`) de cada tarefa e permite editar
-início/fim por um campo de data acessível em cada linha (arrastar-e-soltar
-para redimensionar a barra fica para uma iteração futura — documentado como
-tal, não fingido). Toda a lógica de negócio e a maior parte da UI foram
-desenvolvidas com TDD (`npm run test`). As demais fases (automação,
-integrações Microsoft, ideias) têm o **schema de banco e RLS já definidos**
-(`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
-existem como placeholders honestos que dizem em qual fase serão
-implementadas, em vez de simular funcionalidade.
+**Status atual: Fases 1–6 e 9 concluídas (falta 7 e 8).** Autenticação,
+hierarquia organizacional, RBAC, layout (sidebar/topbar/command palette) e
+uma Home adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD,
+subtarefas, comentários, múltiplos responsáveis, prioridade/status
+editáveis inline e filtros (Fase 2); o módulo de Projetos — CRUD, fases,
+membros e progresso calculado automaticamente a partir das tarefas
+vinculadas (Fase 3); as quatro views sobre essa mesma tarefa — **Lista,
+Kanban, Calendário e Gantt** (Fase 4); o módulo de **Notas** — páginas e
+subpáginas em árvore, blocos (parágrafo, título, código, checklist com
+itens marcáveis), e salvamento automático com indicador "Salvo"/"Salvando..."/
+"Alterações não salvas" (Fase 5); a camada de **Gestão** — Minha Equipe com
+carga de trabalho calculada e classificada (baixa/normal/elevada/sobrecarga),
+Dashboards com indicadores e gráficos (Recharts) em tempo real, e Relatórios
+de produtividade com exportação CSV (Fase 6); e a **Central de Ideias** —
+pipeline de 7 etapas (seção 20), registro rápido, avanço de etapa e
+transformação de uma ideia aprovada em projeto de verdade (Fase 9) — estão
+prontos. Nenhuma view duplica dados: todas leem e escrevem através dos
+mesmos `src/repositories/taskRepository.ts` / `projectRepository.ts` /
+`eventRepository.ts` / `noteRepository.ts` / `ideaRepository.ts`. O Gantt lê
+o progresso e as dependências (`task_dependencies`) de cada tarefa e
+permite editar início/fim por um campo de data acessível em cada linha
+(arrastar-e-soltar para redimensionar a barra fica para uma iteração
+futura — documentado como tal, não fingido). Toda a lógica de negócio e a
+maior parte da UI foram desenvolvidas com TDD (`npm run test`). Faltam as
+Fases 7 (automação/e-mail) e 8 (integrações Microsoft) — o **schema de
+banco e RLS já estão definidos** (`supabase/migrations/`), mas a UI e as
+Edge Functions ainda não foram construídas; essas duas fases dependem de
+segredos e serviços reais (SMTP, OAuth Microsoft) que só se validam por
+completo com você conectando credenciais de verdade — as rotas existem
+como placeholders honestos que dizem em qual fase serão implementadas, em
+vez de simular funcionalidade.
 
 ## Stack
 
@@ -141,7 +146,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (199 testes):
+Cobertura atual (217 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -193,6 +198,11 @@ Cobertura atual (199 testes):
 - `src/features/reports/reportLogic.test.ts` e `src/pages/Reports.test.tsx`
   — taxa de conclusão e de cumprimento de prazo por pessoa, e o conteúdo
   exato do CSV exportado (escapando vírgulas/aspas).
+- `src/features/ideas/ideaLogic.test.ts`, `src/repositories/ideaRepository.test.ts`
+  e `src/pages/Ideas.test.tsx` — avanço pelas 7 etapas do pipeline, filtros,
+  e a conversão de uma ideia aprovada em projeto real (dois inserts
+  sequenciais: cria o projeto, depois vincula `converted_project_id` na
+  ideia).
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.

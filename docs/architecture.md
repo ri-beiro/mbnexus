@@ -276,7 +276,7 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 | 6 | Gestão: workload, dashboards, relatórios | **concluída (TDD)** |
 | 7 | Automação: regras, notificações, e-mail, recorrência | planejado |
 | 8 | Integrações Microsoft (Graph/Teams/Outlook) + SMTP Locaweb | planejado |
-| 9 | Central de Ideias / melhoria contínua | planejado |
+| 9 | Central de Ideias / melhoria contínua | **concluída (TDD)** |
 
 Cada fase só inicia com a anterior estável (build limpo, RLS testado, sem dados mockados como
 solução definitiva — seção 54).

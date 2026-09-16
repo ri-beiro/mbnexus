@@ -297,6 +297,14 @@ export interface Idea {
   updated_at: string;
 }
 
+export interface IdeaComment {
+  id: string;
+  idea_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+}
+
 // Generic row/insert/update helpers keep repositories terse without a full
 // codegen'd Database type. Swap for `supabase gen types` output when a real
 // project is linked; the shape (Tables<T>) stays the same either way.
@@ -331,6 +339,7 @@ export interface Database {
       note_blocks: Table<NoteBlock>;
       notifications: Table<Notification>;
       ideas: Table<Idea>;
+      idea_comments: Table<IdeaComment>;
     };
   };
 }
