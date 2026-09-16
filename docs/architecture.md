@@ -273,7 +273,7 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 | 3 | Projetos (CRUD, fases, membros, progresso calculado a partir das tarefas) | **concluída (TDD)** |
 | 4 | Views: Lista, Kanban, Calendário, Gantt | **concluída (TDD)** |
 | 5 | Notas (páginas, blocos, rich text) | **concluída (TDD)** |
-| 6 | Gestão: workload, dashboards, relatórios | planejado |
+| 6 | Gestão: workload, dashboards, relatórios | **concluída (TDD)** |
 | 7 | Automação: regras, notificações, e-mail, recorrência | planejado |
 | 8 | Integrações Microsoft (Graph/Teams/Outlook) + SMTP Locaweb | planejado |
 | 9 | Central de Ideias / melhoria contínua | planejado |

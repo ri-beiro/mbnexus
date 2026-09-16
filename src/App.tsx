@@ -13,13 +13,10 @@ import { Projects } from "@/pages/Projects";
 import { Calendar } from "@/pages/Calendar";
 import { Gantt } from "@/pages/Gantt";
 import { Notes } from "@/pages/Notes";
-import {
-  DashboardsPage,
-  HelpPage,
-  IdeasPage,
-  ReportsPage,
-  TeamPage,
-} from "@/pages/placeholders";
+import { Team } from "@/pages/Team";
+import { Dashboards } from "@/pages/Dashboards";
+import { Reports } from "@/pages/Reports";
+import { HelpPage, IdeasPage } from "@/pages/placeholders";
 
 export default function App() {
   return (
@@ -44,9 +41,9 @@ export default function App() {
                 <Route path="/gantt" element={<Gantt />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/ideas" element={<IdeasPage />} />
-                <Route path="/dashboards" element={<DashboardsPage />} />
-                <Route path="/team" element={<TeamPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/dashboards" element={<Dashboards />} />
+                <Route path="/team" element={<Team />} />
+                <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/help" element={<HelpPage />} />
               </Route>

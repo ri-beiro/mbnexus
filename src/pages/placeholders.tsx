@@ -1,14 +1,5 @@
-import {
-  BarChart3,
-  HelpCircle,
-  LayoutDashboard,
-  Lightbulb,
-  Users,
-} from "lucide-react";
+import { HelpCircle, Lightbulb } from "lucide-react";
 import { ComingSoon } from "@/components/ComingSoon";
 
 export const IdeasPage = () => <ComingSoon icon={Lightbulb} title="Central de Ideias" phase="Fase 9" />;
-export const DashboardsPage = () => <ComingSoon icon={LayoutDashboard} title="Dashboards" phase="Fase 6" />;
-export const TeamPage = () => <ComingSoon icon={Users} title="Minha Equipe" phase="Fase 6" />;
-export const ReportsPage = () => <ComingSoon icon={BarChart3} title="Relatórios" phase="Fase 6" />;
 export const HelpPage = () => <ComingSoon icon={HelpCircle} title="Ajuda" phase="uma fase futura" />;

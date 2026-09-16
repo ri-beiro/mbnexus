@@ -4,28 +4,32 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–5 concluídas.** Autenticação, hierarquia
+**Status atual: Fases 1–6 concluídas.** Autenticação, hierarquia
 organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
 adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
 comentários, múltiplos responsáveis, prioridade/status editáveis inline e
 filtros (Fase 2); o módulo de Projetos — CRUD, fases, membros e progresso
 calculado automaticamente a partir das tarefas vinculadas (Fase 3); as
 quatro views sobre essa mesma tarefa — **Lista, Kanban, Calendário e
-Gantt** (Fase 4); e o módulo de **Notas** — páginas e subpáginas em árvore,
+Gantt** (Fase 4); o módulo de **Notas** — páginas e subpáginas em árvore,
 blocos (parágrafo, título, código, checklist com itens marcáveis), e
 salvamento automático com indicador "Salvo"/"Salvando..."/"Alterações não
-salvas" (Fase 5) — estão prontos. Nenhuma view duplica dados: todas leem e
-escrevem através dos mesmos `src/repositories/taskRepository.ts` /
-`projectRepository.ts` / `eventRepository.ts` / `noteRepository.ts`. O
-Gantt lê o progresso e as dependências (`task_dependencies`) de cada tarefa
-e permite editar início/fim por um campo de data acessível em cada linha
-(arrastar-e-soltar para redimensionar a barra fica para uma iteração
-futura — documentado como tal, não fingido). Toda a lógica de negócio e a
-maior parte da UI foram desenvolvidas com TDD (`npm run test`). As demais
-fases (gestão, automação, integrações Microsoft, ideias) têm o **schema de
-banco e RLS já definidos** (`supabase/migrations/`), mas a UI ainda não foi
-construída — as rotas existem como placeholders honestos que dizem em qual
-fase serão implementadas, em vez de simular funcionalidade.
+salvas" (Fase 5); e a camada de **Gestão** — Minha Equipe com carga de
+trabalho calculada e classificada (baixa/normal/elevada/sobrecarga),
+Dashboards com indicadores e gráficos (Recharts) em tempo real, e
+Relatórios de produtividade com exportação CSV (Fase 6) — estão prontos.
+Nenhuma view duplica dados: todas leem e escrevem através dos mesmos
+`src/repositories/taskRepository.ts` / `projectRepository.ts` /
+`eventRepository.ts` / `noteRepository.ts`. O Gantt lê o progresso e as
+dependências (`task_dependencies`) de cada tarefa e permite editar
+início/fim por um campo de data acessível em cada linha (arrastar-e-soltar
+para redimensionar a barra fica para uma iteração futura — documentado como
+tal, não fingido). Toda a lógica de negócio e a maior parte da UI foram
+desenvolvidas com TDD (`npm run test`). As demais fases (automação,
+integrações Microsoft, ideias) têm o **schema de banco e RLS já definidos**
+(`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
+existem como placeholders honestos que dizem em qual fase serão
+implementadas, em vez de simular funcionalidade.
 
 ## Stack
 
@@ -137,7 +141,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (172 testes):
+Cobertura atual (199 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -178,6 +182,17 @@ Cobertura atual (172 testes):
   `src/features/notes/NoteEditor.test.tsx` e `src/pages/Notes.test.tsx` —
   CRUD de páginas/blocos, navegação na árvore, edição de blocos (salva ao
   perder o foco) e do checklist (salva ao marcar um item).
+- `src/features/workload/workloadLogic.test.ts` e `src/pages/Team.test.tsx`
+  — cálculo de carga de trabalho (minutos estimados de tarefas abertas
+  contra a capacidade semanal) e sua classificação em quatro níveis.
+- `src/features/dashboards/dashboardLogic.test.ts` e `src/pages/Dashboards.test.tsx`
+  — distribuição de tarefas/projetos por status e prioridade; os gráficos
+  Recharts trazem uma legenda em texto ao lado (também a alternativa
+  acessível) porque o jsdom não posiciona SVG de forma significativa, então
+  é a legenda que os testes leem.
+- `src/features/reports/reportLogic.test.ts` e `src/pages/Reports.test.tsx`
+  — taxa de conclusão e de cumprimento de prazo por pessoa, e o conteúdo
+  exato do CSV exportado (escapando vírgulas/aspas).
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.
