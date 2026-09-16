@@ -181,6 +181,13 @@ export interface Task {
   updated_at: string;
 }
 
+export interface TaskDependency {
+  id: string;
+  task_id: string;
+  depends_on_task_id: string;
+  type: DependencyType;
+}
+
 export interface TaskAssignee {
   task_id: string;
   profile_id: string;

@@ -4,23 +4,24 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–3 concluídas; Fase 4 em andamento (Kanban pronto).**
-Autenticação, hierarquia organizacional, RBAC, layout (sidebar/topbar/command
-palette) e uma Home adaptativa por papel (Fase 1); o módulo de Tarefas —
-CRUD, subtarefas, comentários, múltiplos responsáveis, prioridade/status
-editáveis inline e filtros (Fase 2); o módulo de Projetos — CRUD, fases,
-membros e progresso calculado automaticamente a partir das tarefas
-vinculadas (Fase 3); e um **board Kanban** e um **Calendário mensal**
-(Fase 4, parcial) — o Kanban reusa a mesma entidade de tarefa da Lista
-(`src/repositories/taskRepository.ts`), e o Calendário mostra tarefas
-(pelo prazo) e eventos/reuniões/prazos (`src/repositories/eventRepository.ts`)
-juntos, com arrastar-e-soltar para mudar a data de qualquer um dos dois —
-nenhuma view duplica dados. Toda a lógica de negócio e a maior parte da UI
-foram desenvolvidas com TDD (`npm run test`). Ainda falta da Fase 4: Gantt.
-As demais fases (notas, gestão, automação, integrações Microsoft,
-ideias) têm o **schema de banco e RLS já definidos**
-(`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
-existem como placeholders honestos que dizem em qual fase serão
+**Status atual: Fases 1–4 concluídas.** Autenticação, hierarquia
+organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
+adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
+comentários, múltiplos responsáveis, prioridade/status editáveis inline e
+filtros (Fase 2); o módulo de Projetos — CRUD, fases, membros e progresso
+calculado automaticamente a partir das tarefas vinculadas (Fase 3); e as
+quatro views sobre essa mesma tarefa — **Lista, Kanban, Calendário e
+Gantt** (Fase 4) — estão prontas. Nenhuma view duplica dados: todas leem e
+escrevem através dos mesmos `src/repositories/taskRepository.ts` /
+`projectRepository.ts` / `eventRepository.ts`. O Gantt lê o progresso e as
+dependências (`task_dependencies`) de cada tarefa e permite editar
+início/fim por um campo de data acessível em cada linha (arrastar-e-soltar
+para redimensionar a barra fica para uma iteração futura — documentado como
+tal, não fingido). Toda a lógica de negócio e a maior parte da UI foram
+desenvolvidas com TDD (`npm run test`). As demais fases (notas, gestão,
+automação, integrações Microsoft, ideias) têm o **schema de banco e RLS já
+definidos** (`supabase/migrations/`), mas a UI ainda não foi construída —
+as rotas existem como placeholders honestos que dizem em qual fase serão
 implementadas, em vez de simular funcionalidade.
 
 ## Stack
@@ -133,7 +134,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (116 testes):
+Cobertura atual (134 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -158,6 +159,11 @@ Cobertura atual (116 testes):
   data (preservando horário e duração de um evento) testado via um
   `<input type="date">` acessível por item, incluindo o roteamento correto
   entre `updateTask` (para uma tarefa) e `updateEvent` (para um evento).
+- `src/features/gantt/ganttLogic.test.ts`, `src/features/gantt/GanttChart.test.tsx`
+  e `src/pages/Gantt.test.tsx` — cálculo da linha do tempo (intervalo,
+  posição/largura de cada barra em dias), exibição de dependências
+  (`task_dependencies`), seleção de projeto e edição de início/fim por
+  tarefa.
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.

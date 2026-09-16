@@ -11,9 +11,12 @@ import {
   addTaskComment,
   createSubtask,
   createTask,
+  createTaskDependency,
   deleteTask,
+  deleteTaskDependency,
   listSubtasks,
   listTaskComments,
+  listTaskDependencies,
   listTasks,
   removeTaskAssignee,
   updateTask,
@@ -200,5 +203,41 @@ describe("listTasks", () => {
     await listTasks();
 
     expect(mock.is).toHaveBeenCalledWith("parent_task_id", null);
+  });
+});
+
+describe("listTaskDependencies / createTaskDependency / deleteTaskDependency", () => {
+  it("lists dependencies whose task_id is in the given set", async () => {
+    const rows = [{ id: "d1", task_id: "t2", depends_on_task_id: "t1", type: "finish_start" }];
+    const mock = createChainableMock({ data: rows, error: null });
+    from.mockReturnValue(mock as never);
+
+    const result = await listTaskDependencies(["t1", "t2"]);
+
+    expect(from).toHaveBeenCalledWith("task_dependencies");
+    expect(mock.in).toHaveBeenCalledWith("task_id", ["t1", "t2"]);
+    expect(result).toEqual(rows);
+  });
+
+  it("creates a finish_start dependency by default", async () => {
+    const row = { id: "d1", task_id: "t2", depends_on_task_id: "t1", type: "finish_start" };
+    const mock = createChainableMock({ data: row, error: null });
+    from.mockReturnValue(mock as never);
+
+    const result = await createTaskDependency("t2", "t1");
+
+    expect(mock.insert).toHaveBeenCalledWith({ task_id: "t2", depends_on_task_id: "t1", type: "finish_start" });
+    expect(result).toEqual(row);
+  });
+
+  it("deletes a dependency by id", async () => {
+    const mock = createChainableMock({ data: null, error: null });
+    from.mockReturnValue(mock as never);
+
+    await deleteTaskDependency("d1");
+
+    expect(from).toHaveBeenCalledWith("task_dependencies");
+    expect(mock.delete).toHaveBeenCalled();
+    expect(mock.eq).toHaveBeenCalledWith("id", "d1");
   });
 });

@@ -1,5 +1,5 @@
 import { supabase } from "@/lib/supabase";
-import type { Task, TaskComment, TaskPriority, TaskStatus } from "@/types/database";
+import type { DependencyType, Task, TaskComment, TaskDependency, TaskPriority, TaskStatus } from "@/types/database";
 
 export interface MyTask extends Task {
   project_name: string | null;
@@ -119,6 +119,31 @@ export async function listSubtasks(parentTaskId: string): Promise<Task[]> {
 
 export async function createSubtask(input: CreateTaskInput & { parentTaskId: string }): Promise<Task> {
   return createTask(input);
+}
+
+export async function listTaskDependencies(taskIds: string[]): Promise<TaskDependency[]> {
+  const { data, error } = await supabase.from("task_dependencies").select("*").in("task_id", taskIds);
+  if (error) throw error;
+  return (data ?? []) as TaskDependency[];
+}
+
+export async function createTaskDependency(
+  taskId: string,
+  dependsOnTaskId: string,
+  type: DependencyType = "finish_start",
+): Promise<TaskDependency> {
+  const { data, error } = await supabase
+    .from("task_dependencies")
+    .insert({ task_id: taskId, depends_on_task_id: dependsOnTaskId, type })
+    .select()
+    .single();
+  if (error) throw error;
+  return data as TaskDependency;
+}
+
+export async function deleteTaskDependency(dependencyId: string): Promise<void> {
+  const { error } = await supabase.from("task_dependencies").delete().eq("id", dependencyId);
+  if (error) throw error;
 }
 
 export interface TaskListRow extends Task {

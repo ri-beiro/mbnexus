@@ -11,6 +11,7 @@ import { Tasks } from "@/pages/Tasks";
 import { Kanban } from "@/pages/Kanban";
 import { Projects } from "@/pages/Projects";
 import { Calendar } from "@/pages/Calendar";
+import { Gantt } from "@/pages/Gantt";
 import {
   DashboardsPage,
   HelpPage,
@@ -40,6 +41,7 @@ export default function App() {
                 <Route path="/kanban" element={<Kanban />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/calendar" element={<Calendar />} />
+                <Route path="/gantt" element={<Gantt />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/ideas" element={<IdeasPage />} />
                 <Route path="/dashboards" element={<DashboardsPage />} />
