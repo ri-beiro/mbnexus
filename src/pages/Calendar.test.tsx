@@ -21,17 +21,19 @@ vi.mock("@/repositories/eventRepository", () => ({
   listEvents: vi.fn(),
   createEvent: vi.fn(),
   updateEvent: vi.fn(),
+  createTeamsMeeting: vi.fn(),
 }));
 
 import { Calendar } from "@/pages/Calendar";
 import { listTasks, updateTask } from "@/repositories/taskRepository";
-import { createEvent, listEvents, updateEvent } from "@/repositories/eventRepository";
+import { createEvent, createTeamsMeeting, listEvents, updateEvent } from "@/repositories/eventRepository";
 
 const mockListTasks = vi.mocked(listTasks);
 const mockUpdateTask = vi.mocked(updateTask);
 const mockListEvents = vi.mocked(listEvents);
 const mockCreateEvent = vi.mocked(createEvent);
 const mockUpdateEvent = vi.mocked(updateEvent);
+const mockCreateTeamsMeeting = vi.mocked(createTeamsMeeting);
 
 function makeTask(overrides: Partial<TaskListRow> & { id: string; title: string }): TaskListRow {
   return {
@@ -90,6 +92,7 @@ beforeEach(() => {
   mockListEvents.mockReset();
   mockCreateEvent.mockReset();
   mockUpdateEvent.mockReset();
+  mockCreateTeamsMeeting.mockReset();
 });
 
 describe("Calendar page", () => {
@@ -123,6 +126,60 @@ describe("Calendar page", () => {
         expect.objectContaining({ title: "Novo evento", organizationId: "org-1", createdBy: "user-1" }),
       ),
     );
+  });
+
+  it("does not offer a Teams link for a plain event", async () => {
+    mockListTasks.mockResolvedValue([]);
+    mockListEvents.mockResolvedValue([]);
+
+    renderPage();
+    await waitFor(() => expect(mockListEvents).toHaveBeenCalled());
+
+    expect(screen.queryByLabelText(/criar link do teams/i)).not.toBeInTheDocument();
+  });
+
+  it("offers a Teams link checkbox once the type is set to reunião, and creates the meeting on submit", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([]);
+    mockListEvents.mockResolvedValueOnce([]);
+    mockCreateEvent.mockResolvedValue(makeEvent({ id: "new-1", title: "Reunião de alinhamento", type: "meeting" }));
+    mockListEvents.mockResolvedValueOnce([makeEvent({ id: "new-1", title: "Reunião de alinhamento", type: "meeting" })]);
+    mockCreateTeamsMeeting.mockResolvedValue(
+      makeEvent({ id: "new-1", title: "Reunião de alinhamento", type: "meeting", teams_join_url: "https://teams.microsoft.com/x" }),
+    );
+
+    renderPage();
+    await waitFor(() => expect(mockListEvents).toHaveBeenCalled());
+
+    await user.selectOptions(screen.getByLabelText(/tipo/i), "meeting");
+    await user.click(screen.getByLabelText(/criar link do teams/i));
+    await user.type(screen.getByPlaceholderText(/novo evento/i), "Reunião de alinhamento");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() =>
+      expect(mockCreateEvent).toHaveBeenCalledWith(
+        expect.objectContaining({ title: "Reunião de alinhamento", type: "meeting" }),
+      ),
+    );
+    await waitFor(() => expect(mockCreateTeamsMeeting).toHaveBeenCalledWith("new-1"));
+  });
+
+  it("does not call createTeamsMeeting when the checkbox is left unchecked", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([]);
+    mockListEvents.mockResolvedValueOnce([]);
+    mockCreateEvent.mockResolvedValue(makeEvent({ id: "new-1", title: "Reunião sem Teams", type: "meeting" }));
+    mockListEvents.mockResolvedValueOnce([makeEvent({ id: "new-1", title: "Reunião sem Teams", type: "meeting" })]);
+
+    renderPage();
+    await waitFor(() => expect(mockListEvents).toHaveBeenCalled());
+
+    await user.selectOptions(screen.getByLabelText(/tipo/i), "meeting");
+    await user.type(screen.getByPlaceholderText(/novo evento/i), "Reunião sem Teams");
+    await user.keyboard("{Enter}");
+
+    await waitFor(() => expect(mockCreateEvent).toHaveBeenCalled());
+    expect(mockCreateTeamsMeeting).not.toHaveBeenCalled();
   });
 
   it("moving a task's date updates the task, not an event", async () => {

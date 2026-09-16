@@ -312,6 +312,16 @@ export interface NotificationPreference {
   updated_at: string;
 }
 
+export interface Integration {
+  id: string;
+  organization_id: string;
+  provider: string;
+  is_enabled: boolean;
+  config: Record<string, unknown>;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Automation {
   id: string;
   organization_id: string;
@@ -399,6 +409,7 @@ export interface Database {
       note_blocks: Table<NoteBlock>;
       notifications: Table<Notification>;
       notification_preferences: Table<NotificationPreference>;
+      integrations: Table<Integration>;
       automations: Table<Automation>;
       automation_runs: Table<AutomationRun>;
       email_templates: Table<EmailTemplate>;

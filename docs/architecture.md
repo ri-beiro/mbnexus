@@ -275,7 +275,7 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 | 5 | Notas (páginas, blocos, rich text) | **concluída (TDD)** |
 | 6 | Gestão: workload, dashboards, relatórios | **concluída (TDD)** |
 | 7 | Automação: regras, notificações, e-mail, recorrência | **concluída (TDD)** — Edge Functions escritas mas não verificadas (sem runtime Deno/segredos reais no ambiente de build; ver `supabase/functions/README.md`) |
-| 8 | Integrações Microsoft (Graph/Teams/Outlook) + SMTP Locaweb | planejado |
+| 8 | Integrações Microsoft (Graph/Teams/Outlook) + SMTP Locaweb | **concluída (TDD)** — apenas "criar reunião Teams a partir de um evento" (a fatia que o prompt mestre descreve em detalhe); Edge Function escrita mas não verificada (mesma ressalva da Fase 7); Outlook/presença/chat não iniciados |
 | 9 | Central de Ideias / melhoria contínua | **concluída (TDD)** |
 
 Cada fase só inicia com a anterior estável (build limpo, RLS testado, sem dados mockados como

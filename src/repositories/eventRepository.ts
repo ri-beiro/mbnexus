@@ -72,3 +72,13 @@ export async function deleteEvent(eventId: string): Promise<void> {
   const { error } = await supabase.from("events").delete().eq("id", eventId);
   if (error) throw error;
 }
+
+/** Calls the `ms-meetings` Edge Function (docs/architecture.md section 7) to
+ * create a Teams online meeting for this event and persist its join link.
+ * Requires the org's Microsoft 365 integration to be enabled — see
+ * MicrosoftIntegrationPanel and supabase/functions/README.md. */
+export async function createTeamsMeeting(eventId: string): Promise<Event> {
+  const { data, error } = await supabase.functions.invoke("ms-meetings", { body: { eventId } });
+  if (error) throw error;
+  return data as Event;
+}

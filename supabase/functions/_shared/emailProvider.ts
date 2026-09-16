@@ -3,6 +3,7 @@
 // Microsoft Graph — or back — never touches business logic.
 import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 import { requiredEnv } from "./supabaseAdmin.ts";
+import { getGraphAppToken } from "./graphAuth.ts";
 
 export interface EmailMessage {
   to: string;
@@ -12,28 +13,6 @@ export interface EmailMessage {
 
 export interface EmailProvider {
   send(message: EmailMessage): Promise<void>;
-}
-
-interface GraphTokenResponse {
-  access_token: string;
-}
-
-async function getGraphAppToken(tenantId: string, clientId: string, clientSecret: string): Promise<string> {
-  const response = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      scope: "https://graph.microsoft.com/.default",
-      grant_type: "client_credentials",
-    }),
-  });
-  if (!response.ok) {
-    throw new Error(`Falha ao obter token do Microsoft Graph: ${response.status} ${await response.text()}`);
-  }
-  const data = (await response.json()) as GraphTokenResponse;
-  return data.access_token;
 }
 
 /** Sends mail as an application (client-credentials), from a fixed shared

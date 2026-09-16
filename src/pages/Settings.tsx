@@ -9,14 +9,9 @@ import { UsersPanel } from "@/features/hierarchy/UsersPanel";
 import { NotificationPreferencesPanel } from "@/features/notifications/NotificationPreferencesPanel";
 import { AutomationsPanel } from "@/features/automation/AutomationsPanel";
 import { EmailTemplatesPanel } from "@/features/automation/EmailTemplatesPanel";
+import { MicrosoftIntegrationPanel } from "@/features/integrations/MicrosoftIntegrationPanel";
 
-const FUTURE_SECTIONS = [
-  "Integrações (Microsoft 365 / Teams / Outlook)",
-  "Permissões avançadas",
-  "Status personalizados",
-  "Tags",
-  "Auditoria",
-];
+const FUTURE_SECTIONS = ["Permissões avançadas", "Status personalizados", "Tags", "Auditoria"];
 
 export function Settings() {
   const { profile, roles } = useAuth();
@@ -36,6 +31,7 @@ export function Settings() {
           <TabsTrigger value="notifications">Notificações</TabsTrigger>
           <TabsTrigger value="automation">Automação</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="integrations">Integrações</TabsTrigger>
           <TabsTrigger value="future">Próximas fases</TabsTrigger>
         </TabsList>
 
@@ -112,6 +108,18 @@ export function Settings() {
             </CardHeader>
             <CardContent>
               <EmailTemplatesPanel />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="integrations">
+          <Card>
+            <CardHeader>
+              <CardTitle>Microsoft 365 / Teams</CardTitle>
+              <CardDescription>Criação de reuniões Teams a partir de eventos do calendário.</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <MicrosoftIntegrationPanel />
             </CardContent>
           </Card>
         </TabsContent>

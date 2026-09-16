@@ -5,12 +5,20 @@ import { useCalendarData } from "@/features/calendar/useCalendarData";
 import { buildCalendarItems, shiftEventToDate } from "@/features/calendar/calendarLogic";
 import { CalendarGrid } from "@/features/calendar/CalendarGrid";
 import { updateTask } from "@/repositories/taskRepository";
-import { createEvent, updateEvent } from "@/repositories/eventRepository";
+import { createEvent, createTeamsMeeting, updateEvent } from "@/repositories/eventRepository";
 import { useToast } from "@/components/ui/toast-provider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import type { EventType } from "@/types/database";
+
+const EVENT_TYPE_LABELS: Record<EventType, string> = {
+  event: "Evento",
+  meeting: "Reunião",
+  deadline: "Prazo",
+};
 
 const MONTH_LABELS = [
   "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
@@ -26,6 +34,8 @@ export function Calendar() {
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
   const [quickTitle, setQuickTitle] = useState("");
+  const [quickType, setQuickType] = useState<EventType>("event");
+  const [createTeamsLink, setCreateTeamsLink] = useState(false);
   const [creating, setCreating] = useState(false);
 
   const items = useMemo(() => buildCalendarItems(tasks, events), [tasks, events]);
@@ -44,8 +54,33 @@ export function Calendar() {
       const now = new Date();
       const startsAt = now.toISOString();
       const endsAt = new Date(now.getTime() + 60 * 60 * 1000).toISOString();
-      await createEvent({ organizationId: profile.organization_id, title, createdBy: profile.id, startsAt, endsAt });
+      const created = await createEvent({
+        organizationId: profile.organization_id,
+        title,
+        createdBy: profile.id,
+        startsAt,
+        endsAt,
+        type: quickType,
+      });
       setQuickTitle("");
+
+      if (quickType === "meeting" && createTeamsLink) {
+        try {
+          const updated = await createTeamsMeeting(created.id);
+          toast({
+            title: "Reunião do Teams criada",
+            description: updated.teams_join_url ?? undefined,
+            variant: "success",
+          });
+        } catch (err) {
+          toast({
+            title: "Evento criado, mas não foi possível gerar o link do Teams",
+            description: err instanceof Error ? err.message : undefined,
+            variant: "destructive",
+          });
+        }
+      }
+
       await reload();
     } catch (err) {
       toast({
@@ -100,7 +135,7 @@ export function Calendar() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 rounded-lg border p-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
         <Input
           value={quickTitle}
           onChange={(e) => setQuickTitle(e.target.value)}
@@ -109,7 +144,36 @@ export function Calendar() {
           }}
           placeholder="Novo evento… pressione Enter para criar hoje"
           disabled={creating}
+          className="min-w-48 flex-1"
         />
+        <select
+          aria-label="Tipo"
+          value={quickType}
+          onChange={(e) => setQuickType(e.target.value as EventType)}
+          disabled={creating}
+          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+        >
+          {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map((type) => (
+            <option key={type} value={type}>
+              {EVENT_TYPE_LABELS[type]}
+            </option>
+          ))}
+        </select>
+        {quickType === "meeting" && (
+          <div className="flex items-center gap-1.5">
+            <input
+              id="create-teams-link"
+              type="checkbox"
+              checked={createTeamsLink}
+              onChange={(e) => setCreateTeamsLink(e.target.checked)}
+              disabled={creating}
+              className="h-4 w-4"
+            />
+            <Label htmlFor="create-teams-link" className="text-xs font-normal">
+              Criar link do Teams
+            </Label>
+          </div>
+        )}
         <Button type="button" onClick={handleQuickCreate} disabled={creating || !quickTitle.trim()}>
           <Plus className="h-4 w-4" /> Adicionar
         </Button>

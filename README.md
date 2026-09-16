@@ -4,7 +4,8 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1–7 e 9 concluídas (falta 8).** Autenticação,
+**Status atual: todas as 9 fases do roadmap concluídas** (com uma ressalva
+importante sobre as Edge Functions, detalhada abaixo). Autenticação,
 hierarquia organizacional, RBAC, layout (sidebar/topbar/command palette) e
 uma Home adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD,
 subtarefas, comentários, múltiplos responsáveis, prioridade/status
@@ -32,20 +33,35 @@ através dos mesmos `src/repositories/taskRepository.ts` / `projectRepository.ts
 (`task_dependencies`) de cada tarefa e permite editar início/fim por um campo
 de data acessível em cada linha (arrastar-e-soltar para redimensionar a
 barra fica para uma iteração futura — documentado como tal, não fingido).
-Toda a lógica de negócio e a maior parte da UI foram desenvolvidas com TDD
-(`npm run test`). A Fase 7 tem uma parte que **não** foi (e não podia ser)
-validada nesta sessão: as duas Edge Functions em `supabase/functions/`
-(`automations` e `process-email-queue`, que de fato disparam e-mails via
-Microsoft Graph/SMTP Locaweb) foram escritas com cuidado mas exigem um
-runtime Deno real e segredos reais para rodar — o sandbox não tem nenhum dos
-dois (a instalação do Deno foi tentada e bloqueada pelo proxy da rede). Ver
-`supabase/functions/README.md` para o que falta verificar antes de confiar
-nelas em produção. Falta a Fase 8 (integrações Microsoft 365/Teams/Outlook)
-— o **schema de banco e RLS já estão definidos** (`supabase/migrations/`),
-mas a UI ainda não foi construída; essa fase depende de segredos e serviços
-reais (OAuth Microsoft) que só se validam por completo com você conectando
-credenciais de verdade — as rotas existem como placeholders honestos que
-dizem em qual fase serão implementadas, em vez de simular funcionalidade.
+E a **integração Microsoft 365/Teams** (Fase 8) — uma aba "Integrações" em
+Configurações onde um Super Admin ativa a integração e configura o e-mail
+organizador, e um seletor de tipo de evento no Calendário que, para uma
+reunião, oferece "Criar link do Teams" e grava o link retornado de volta no
+evento (`teams_meeting_id`/`teams_join_url`) — está pronta do lado que dá
+para testar sem depender de credenciais reais. Nenhuma view duplica dados:
+todas leem e escrevem através dos mesmos `src/repositories/taskRepository.ts` /
+`projectRepository.ts` / `eventRepository.ts` / `noteRepository.ts` /
+`ideaRepository.ts` / `notificationRepository.ts` / `automationRepository.ts` /
+`emailTemplateRepository.ts` / `integrationRepository.ts`. O Gantt lê o
+progresso e as dependências (`task_dependencies`) de cada tarefa e permite
+editar início/fim por um campo de data acessível em cada linha
+(arrastar-e-soltar para redimensionar a barra fica para uma iteração futura
+— documentado como tal, não fingido). Toda a lógica de negócio e a maior
+parte da UI foram desenvolvidas com TDD (`npm run test`).
+
+**Ressalva real, não escondida:** as três Edge Functions em
+`supabase/functions/` (`automations`, `process-email-queue` — Fase 7 — e
+`ms-meetings` — Fase 8, que de fato disparam e-mails via Microsoft
+Graph/SMTP Locaweb e criam reuniões reais no Teams) foram escritas com
+cuidado, seguindo as mesmas convenções do resto do repositório, mas **não
+puderam ser executadas nem verificadas nesta sessão**: o sandbox não tem
+runtime Deno, não tem Docker (logo, sem Edge Runtime local do Supabase) e
+não tem nenhum dos segredos reais (SMTP, app registration do Microsoft
+Entra ID) — a instalação do Deno via `curl` foi tentada e bloqueada pelo
+proxy de rede do sandbox. Ver `supabase/functions/README.md` para o que
+falta verificar (com um passo a passo de deploy e secrets) antes de confiar
+nelas em produção. Tudo o mais nesta seção — repositórios, lógica de
+negócio, UI — foi de fato testado e roda.
 
 ## Stack
 
@@ -103,8 +119,10 @@ Ver `.env.example`. Resumo:
 |---|---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Frontend | Não (chave pública, protegida por RLS) |
 | `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_DB_URL` | CLI / Edge Functions | **Sim** — nunca no frontend |
-| `MS_TENANT_ID` / `MS_CLIENT_ID` / `MS_CLIENT_SECRET` | Edge Functions (Fase 8, Microsoft Graph) | **Sim** |
-| `LOCAWEB_SMTP_*` | Edge Functions (Fase 7, e-mail) | **Sim** |
+| `MS_TENANT_ID` / `MS_CLIENT_ID` / `MS_CLIENT_SECRET` / `MS_SENDER_UPN` | Edge Functions (Fase 8 `ms-meetings`; Fase 7 `process-email-queue` quando `EMAIL_PROVIDER=microsoft_graph`) | **Sim** |
+| `LOCAWEB_SMTP_*` / `EMAIL_PROVIDER` | Edge Functions (Fase 7, e-mail) | **Sim** (exceto `EMAIL_PROVIDER`) |
+
+Ver `supabase/functions/README.md` para a lista completa (por função) e o passo a passo de deploy/agendamento.
 
 ## Scripts
 
@@ -133,7 +151,7 @@ src/types/        tipos de domínio (espelham supabase/migrations/*.sql)
 src/test/         infraestrutura de teste (setup do Vitest, mock do Supabase)
 supabase/migrations/  DDL versionado + RLS
 supabase/seed.sql      dados de desenvolvimento
-supabase/functions/    Edge Functions (automação, fila de e-mail — ver README próprio)
+supabase/functions/    Edge Functions (automação, fila de e-mail, reuniões Teams — ver README próprio)
 ```
 
 ## Permissões e segurança
@@ -158,7 +176,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (287 testes):
+Cobertura atual (305 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -239,6 +257,19 @@ Cobertura atual (287 testes):
   inline, excluir).
 - `src/features/tasks/TaskDetailPanel.test.tsx` (casos de repetição) —
   o seletor de recorrência no detalhe da tarefa, incluindo limpar a regra.
+- `src/repositories/integrationRepository.test.ts` — leitura/upsert da
+  configuração (não secreta) da integração Microsoft 365.
+- `src/features/integrations/teamsMeetingLogic.test.ts` — montagem do corpo
+  da requisição `onlineMeetings` do Graph a partir de um evento, e extração
+  de id/link de entrada da resposta (incluindo o campo legado `joinUrl`
+  quando `joinWebUrl` está ausente).
+- `src/features/integrations/MicrosoftIntegrationPanel.test.tsx` — a aba
+  Integrações em Configurações (ativar/desativar, configurar o e-mail
+  organizador).
+- `src/repositories/eventRepository.test.ts` (caso `createTeamsMeeting`) e
+  `src/pages/Calendar.test.tsx` (casos de reunião) — o seletor de tipo de
+  evento e o botão "Criar link do Teams" no Calendário, incluindo o evento
+  criado normalmente mesmo quando a chamada à Edge Function falha.
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.
