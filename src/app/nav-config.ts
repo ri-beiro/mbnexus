@@ -6,6 +6,7 @@ import {
   Home,
   Lightbulb,
   LayoutDashboard,
+  LayoutGrid,
   ListTodo,
   Settings,
   StickyNote,
@@ -25,6 +26,7 @@ export interface NavItem {
 export const PRIMARY_NAV: NavItem[] = [
   { label: "Minha Home", to: "/home", icon: Home },
   { label: "Tarefas", to: "/tasks", icon: ListTodo, shortcut: "N" },
+  { label: "Kanban", to: "/kanban", icon: LayoutGrid, shortcut: "K" },
   { label: "Projetos", to: "/projects", icon: FolderKanban },
   { label: "Calendário", to: "/calendar", icon: Calendar, shortcut: "C" },
   { label: "Notas", to: "/notes", icon: StickyNote },

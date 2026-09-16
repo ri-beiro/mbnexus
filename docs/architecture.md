@@ -271,7 +271,7 @@ erro tratado (nunca `console.log` como tratamento — seção 56).
 | 1 | Fundação: projeto, auth, schema completo (DDL), hierarquia, RBAC, sidebar/topbar, Home básica | **concluída** |
 | 2 | Tarefas (CRUD, subtarefas, comentários, responsáveis, prioridade/status, filtros) | **concluída (TDD)** |
 | 3 | Projetos (CRUD, fases, membros, progresso calculado a partir das tarefas) | **concluída (TDD)** |
-| 4 | Views: Lista, Kanban, Calendário, Gantt | planejado |
+| 4 | Views: Lista, **Kanban** (concluídos, TDD) · Calendário, Gantt | em andamento |
 | 5 | Notas (páginas, blocos, rich text) | planejado |
 | 6 | Gestão: workload, dashboards, relatórios | planejado |
 | 7 | Automação: regras, notificações, e-mail, recorrência | planejado |

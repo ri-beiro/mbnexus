@@ -8,6 +8,7 @@ import { Login } from "@/pages/Login";
 import { Home } from "@/pages/Home";
 import { Settings } from "@/pages/Settings";
 import { Tasks } from "@/pages/Tasks";
+import { Kanban } from "@/pages/Kanban";
 import { Projects } from "@/pages/Projects";
 import {
   CalendarPage,
@@ -36,6 +37,7 @@ export default function App() {
               >
                 <Route path="/home" element={<Home />} />
                 <Route path="/tasks" element={<Tasks />} />
+                <Route path="/kanban" element={<Kanban />} />
                 <Route path="/projects" element={<Projects />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/notes" element={<NotesPage />} />

@@ -4,15 +4,18 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1, 2 e 3 concluídas.** Autenticação, hierarquia
-organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
-adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
-comentários, múltiplos responsáveis, prioridade/status editáveis inline e
-filtros (Fase 2); e o módulo de Projetos — CRUD, fases, membros e progresso
-calculado automaticamente a partir das tarefas vinculadas (Fase 3) — estão
-funcionais ponta a ponta contra o schema real. Toda a lógica de negócio e a
-maior parte da UI foram desenvolvidas com TDD (`npm run test`). As demais
-fases (views/Kanban/Gantt, notas, gestão, automação, integrações Microsoft,
+**Status atual: Fases 1–3 concluídas; Fase 4 em andamento (Kanban pronto).**
+Autenticação, hierarquia organizacional, RBAC, layout (sidebar/topbar/command
+palette) e uma Home adaptativa por papel (Fase 1); o módulo de Tarefas —
+CRUD, subtarefas, comentários, múltiplos responsáveis, prioridade/status
+editáveis inline e filtros (Fase 2); o módulo de Projetos — CRUD, fases,
+membros e progresso calculado automaticamente a partir das tarefas
+vinculadas (Fase 3); e agora um **board Kanban** com drag-and-drop entre
+colunas de status (Fase 4, parcial) — todos consomem a mesma entidade de
+tarefa via `src/repositories/taskRepository.ts`, sem duplicar dados entre a
+Lista e o Kanban. Toda a lógica de negócio e a maior parte da UI foram
+desenvolvidas com TDD (`npm run test`). Ainda faltam da Fase 4: Calendário e
+Gantt. As demais fases (notas, gestão, automação, integrações Microsoft,
 ideias) têm o **schema de banco e RLS já definidos**
 (`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
 existem como placeholders honestos que dizem em qual fase serão
@@ -128,7 +131,7 @@ implementação mínima para ficar verde, com refatoração ao final de cada
 ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
 "progresso calculado a partir dos itens concluídos", antes duplicada em
 tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
-Cobertura atual (80 testes):
+Cobertura atual (92 testes):
 
 - `src/lib/progress.test.ts` — a regra genérica de progresso.
 - `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
@@ -142,6 +145,11 @@ Cobertura atual (80 testes):
   `src/pages/Projects.test.tsx` e `src/features/projects/ProjectDetailPanel.test.tsx`
   — comportamento de UI (filtros, criação rápida, edição inline de status,
   subtarefas/fases, comentários, responsáveis/membros) com Testing Library.
+- `src/features/tasks/kanbanLogic.test.ts`, `src/features/tasks/KanbanBoard.test.tsx`
+  e `src/pages/Kanban.test.tsx` — agrupamento por coluna e mudança de status
+  testados via um `<select>` acessível em cada card (o arrastar-e-soltar em
+  si com dnd-kit é um teste manual/visual — simular a física real de um
+  drag por ponteiro no jsdom não tem valor de sinal).
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.
