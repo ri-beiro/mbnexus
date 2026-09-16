@@ -8,13 +8,13 @@ import { Login } from "@/pages/Login";
 import { Home } from "@/pages/Home";
 import { Settings } from "@/pages/Settings";
 import { Tasks } from "@/pages/Tasks";
+import { Projects } from "@/pages/Projects";
 import {
   CalendarPage,
   DashboardsPage,
   HelpPage,
   IdeasPage,
   NotesPage,
-  ProjectsPage,
   ReportsPage,
   TeamPage,
 } from "@/pages/placeholders";
@@ -36,7 +36,7 @@ export default function App() {
               >
                 <Route path="/home" element={<Home />} />
                 <Route path="/tasks" element={<Tasks />} />
-                <Route path="/projects" element={<ProjectsPage />} />
+                <Route path="/projects" element={<Projects />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/notes" element={<NotesPage />} />
                 <Route path="/ideas" element={<IdeasPage />} />

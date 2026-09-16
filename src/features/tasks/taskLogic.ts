@@ -1,3 +1,4 @@
+import { percentageComplete } from "@/lib/progress";
 import type { Task, TaskPriority, TaskStatus } from "@/types/database";
 
 export interface TaskDueGroups<T> {
@@ -56,9 +57,7 @@ function addDays(isoDate: string, days: number): string {
  * keep the task's own manually-set progress instead of overwriting it.
  */
 export function computeParentProgressFromSubtasks(subtasks: Array<Pick<Task, "status">>): number | null {
-  if (subtasks.length === 0) return null;
-  const done = subtasks.filter((t) => t.status === "concluido").length;
-  return Math.round((done / subtasks.length) * 100);
+  return percentageComplete(subtasks, (t) => t.status === "concluido");
 }
 
 export function sortTasksByDueDate<T extends Pick<Task, "due_date">>(tasks: T[]): T[] {

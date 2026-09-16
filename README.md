@@ -4,14 +4,16 @@ Plataforma corporativa de gestão de trabalho, projetos, tarefas, produtividade,
 documentação e melhoria contínua. Ver `docs/architecture.md` para a arquitetura
 completa (módulos, modelo de dados, RLS, integrações) e o roadmap de fases.
 
-**Status atual: Fases 1 e 2 concluídas.** Autenticação, hierarquia
+**Status atual: Fases 1, 2 e 3 concluídas.** Autenticação, hierarquia
 organizacional, RBAC, layout (sidebar/topbar/command palette) e uma Home
-adaptativa por papel (Fase 1) e o módulo de Tarefas — CRUD, subtarefas,
+adaptativa por papel (Fase 1); o módulo de Tarefas — CRUD, subtarefas,
 comentários, múltiplos responsáveis, prioridade/status editáveis inline e
-filtros (Fase 2) — estão funcionais ponta a ponta contra o schema real, e a
-lógica de negócio de tarefas foi desenvolvida com TDD (`npm run test`). As
-demais fases (projetos, views, notas, gestão, automação, integrações
-Microsoft, ideias) têm o **schema de banco e RLS já definidos**
+filtros (Fase 2); e o módulo de Projetos — CRUD, fases, membros e progresso
+calculado automaticamente a partir das tarefas vinculadas (Fase 3) — estão
+funcionais ponta a ponta contra o schema real. Toda a lógica de negócio e a
+maior parte da UI foram desenvolvidas com TDD (`npm run test`). As demais
+fases (views/Kanban/Gantt, notas, gestão, automação, integrações Microsoft,
+ideias) têm o **schema de banco e RLS já definidos**
 (`supabase/migrations/`), mas a UI ainda não foi construída — as rotas
 existem como placeholders honestos que dizem em qual fase serão
 implementadas, em vez de simular funcionalidade.
@@ -119,19 +121,27 @@ em `docs/architecture.md` seção 6.
 
 ## Testes
 
-O módulo de Tarefas (Fase 2) foi desenvolvido com TDD: para cada função de
-negócio ou componente, primeiro o teste foi escrito e confirmado vermelho
-(rodando de verdade, não só lido), depois a implementação mínima para ficar
-verde, com refatoração ao final de cada ciclo. Cobertura atual:
+Os módulos de Tarefas (Fase 2) e Projetos (Fase 3) foram desenvolvidos com
+TDD: para cada função de negócio ou componente, primeiro o teste foi escrito
+e confirmado vermelho (rodando de verdade, não só lido), depois a
+implementação mínima para ficar verde, com refatoração ao final de cada
+ciclo — por exemplo, `src/lib/progress.ts` nasceu de extrair a lógica de
+"progresso calculado a partir dos itens concluídos", antes duplicada em
+tarefas e projetos, para um único helper testado uma vez e reusado nos dois.
+Cobertura atual (80 testes):
 
-- `src/features/tasks/taskLogic.test.ts` — regras puras (agrupamento por
-  prazo, cálculo de progresso a partir de subtarefas, ordenação, filtros).
-- `src/repositories/taskRepository.test.ts` — CRUD de tarefas, responsáveis,
-  comentários e subtarefas contra um mock fiel do query builder do Supabase
-  (`src/test/supabaseMock.ts`), sem tocar rede.
-- `src/pages/Tasks.test.tsx` e `src/features/tasks/TaskDetailPanel.test.tsx` —
-  comportamento de UI (filtros, criação rápida, edição inline de status,
-  subtarefas/comentários/responsáveis) com Testing Library.
+- `src/lib/progress.test.ts` — a regra genérica de progresso.
+- `src/features/tasks/taskLogic.test.ts` e `src/features/projects/projectLogic.test.ts`
+  — regras puras (agrupamento por prazo, progresso a partir de
+  subtarefas/tarefas vinculadas, ordenação, filtros).
+- `src/repositories/taskRepository.test.ts` e `src/repositories/projectRepository.test.ts`
+  — CRUD, responsáveis/membros, comentários, subtarefas/fases, contra um
+  mock fiel do query builder do Supabase (`src/test/supabaseMock.ts`), sem
+  tocar rede.
+- `src/pages/Tasks.test.tsx`, `src/features/tasks/TaskDetailPanel.test.tsx`,
+  `src/pages/Projects.test.tsx` e `src/features/projects/ProjectDetailPanel.test.tsx`
+  — comportamento de UI (filtros, criação rápida, edição inline de status,
+  subtarefas/fases, comentários, responsáveis/membros) com Testing Library.
 
 Rode `npm run test` antes de cada commit; `npm run test:watch` durante o
 desenvolvimento de uma nova fase.
