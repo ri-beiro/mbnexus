@@ -30,10 +30,11 @@ function NoteNode({
     <div data-testid={`note-tree-node-${node.note.id}`}>
       <div
         className={cn(
-          "group flex items-center gap-1.5 rounded-md py-1 pr-1 text-sm hover:bg-accent",
-          selectedId === node.note.id && "bg-accent font-medium",
+          "group flex items-center gap-1.5 rounded-full py-1.5 pr-1 text-sm transition-colors hover:bg-primary/10",
+          selectedId === node.note.id &&
+            "bg-primary/15 font-medium shadow-[3px_3px_6px_var(--neu-d),-2px_-2px_5px_var(--neu-l)]",
         )}
-        style={{ paddingLeft: 8 + depth * 14 }}
+        style={{ paddingLeft: 10 + depth * 14 }}
       >
         <button type="button" onClick={() => onSelect(node.note.id)} className="flex flex-1 items-center gap-1.5 text-left">
           <FileText className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -43,9 +44,9 @@ function NoteNode({
           type="button"
           onClick={() => onCreateChild(node.note.id)}
           aria-label="Adicionar subpágina"
-          className="opacity-0 group-hover:opacity-100"
+          className="opacity-0 text-muted-foreground hover:text-[var(--neu-lime-solid)] group-hover:opacity-100"
         >
-          <Plus className="h-3.5 w-3.5 text-muted-foreground" />
+          <Plus className="h-3.5 w-3.5" />
         </button>
       </div>
       {node.children.map((child) => (
@@ -61,7 +62,7 @@ export function NoteTree({ notes, selectedId, onSelect, onCreateRoot, onCreateCh
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between px-1">
-        <span className="text-xs font-semibold uppercase text-muted-foreground">Minhas notas</span>
+        <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Minhas notas</span>
         <Button type="button" size="sm" variant="ghost" onClick={onCreateRoot}>
           <Plus className="h-3.5 w-3.5" /> Nova página
         </Button>

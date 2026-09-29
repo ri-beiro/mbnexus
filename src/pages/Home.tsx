@@ -19,13 +19,13 @@ function greeting(): string {
 
 function TaskRow({ task }: { task: MyTask }) {
   return (
-    <li className="flex items-center justify-between gap-3 rounded-md border px-3 py-2">
+    <li className="neu-sunken flex items-center justify-between gap-3 px-3.5 py-2.5">
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{task.title}</p>
         <p className="truncate text-xs text-muted-foreground">{task.project_name ?? "Sem projeto"}</p>
       </div>
       <div className="flex shrink-0 items-center gap-2">
-        {task.due_date && <span className="text-xs text-muted-foreground">{task.due_date}</span>}
+        {task.due_date && <span className="font-mono text-xs text-muted-foreground">{task.due_date}</span>}
         <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]}>{task.priority}</Badge>
       </div>
     </li>
@@ -36,7 +36,7 @@ function TaskGroup({ title, tasks }: { title: string; tasks: MyTask[] }) {
   if (tasks.length === 0) return null;
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold uppercase text-muted-foreground">
+      <h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
         {title} ({tasks.length})
       </h3>
       <ul className="space-y-1.5">

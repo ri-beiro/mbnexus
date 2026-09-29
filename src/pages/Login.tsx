@@ -26,11 +26,11 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
-          <div className="mb-2 flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Layers className="h-5 w-5" />
+          <div className="neu-surface-sm mb-2 flex h-12 w-12 items-center justify-center text-[var(--neu-lime-solid)]">
+            <Layers className="h-6 w-6" />
           </div>
           <CardTitle className="text-lg">Entrar no MB Nexus</CardTitle>
           <CardDescription>Seu Work OS corporativo.</CardDescription>

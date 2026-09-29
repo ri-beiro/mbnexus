@@ -75,7 +75,7 @@ describe("Notes page", () => {
     expect(await screen.findByDisplayValue("Minha página")).toBeInTheDocument();
   });
 
-  it("creates a root page and selects it", async () => {
+  it("creates a root page through the creation dialog and selects it", async () => {
     const user = userEvent.setup();
     mockListNotes.mockResolvedValueOnce([]);
     mockCreateNote.mockResolvedValue(makeNote({ id: "new-1", title: "Sem título" }));
@@ -86,6 +86,7 @@ describe("Notes page", () => {
     await screen.findByText(/selecione ou crie uma página/i);
 
     await user.click(screen.getByRole("button", { name: /nova página/i }));
+    await user.click(await screen.findByRole("button", { name: /criar página/i }));
 
     await waitFor(() =>
       expect(mockCreateNote).toHaveBeenCalledWith(

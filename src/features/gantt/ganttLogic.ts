@@ -43,6 +43,43 @@ export function buildTimelineDays(start: string, end: string): string[] {
   return days;
 }
 
+export interface MonthSpan {
+  label: string;
+  dayCount: number;
+}
+
+const MONTH_LABELS = [
+  "janeiro",
+  "fevereiro",
+  "março",
+  "abril",
+  "maio",
+  "junho",
+  "julho",
+  "agosto",
+  "setembro",
+  "outubro",
+  "novembro",
+  "dezembro",
+];
+
+/** Groups timeline days into consecutive per-month spans, in order, for a
+ * month header row above the day headers. */
+export function buildMonthSpans(days: string[]): MonthSpan[] {
+  const spans: MonthSpan[] = [];
+  for (const day of days) {
+    const [year, month] = day.split("-");
+    const label = `${MONTH_LABELS[Number(month) - 1]} ${year}`;
+    const last = spans[spans.length - 1];
+    if (last && last.label === label) {
+      last.dayCount += 1;
+    } else {
+      spans.push({ label, dayCount: 1 });
+    }
+  }
+  return spans;
+}
+
 export interface BarStyle {
   leftPx: number;
   widthPx: number;

@@ -111,25 +111,25 @@ describe("Projects page", () => {
     expect(screen.getByText("Migração cloud")).toBeInTheDocument();
   });
 
-  it("creates a project from the quick-create input", async () => {
+  it("creates a project through the creation dialog and shows it in the list", async () => {
     const user = userEvent.setup();
     mockListProjects.mockResolvedValueOnce([]);
-    mockCreateProject.mockResolvedValue(makeRow({ id: "new-1", name: "Novo projeto" }) as never);
-    mockListProjects.mockResolvedValueOnce([makeRow({ id: "new-1", name: "Novo projeto" })]);
+    mockCreateProject.mockResolvedValue(makeRow({ id: "new-1", name: "Projeto recém-criado" }) as never);
+    mockListProjects.mockResolvedValueOnce([makeRow({ id: "new-1", name: "Projeto recém-criado" })]);
 
     renderPage();
     await screen.findByText(/nenhum projeto/i);
 
-    const input = screen.getByPlaceholderText(/novo projeto/i);
-    await user.type(input, "Novo projeto");
-    await user.keyboard("{Enter}");
+    await user.click(screen.getByRole("button", { name: /^novo projeto$/i }));
+    await user.type(await screen.findByLabelText(/^nome$/i), "Projeto recém-criado");
+    await user.click(screen.getByRole("button", { name: /criar projeto/i }));
 
     await waitFor(() =>
       expect(mockCreateProject).toHaveBeenCalledWith(
-        expect.objectContaining({ name: "Novo projeto", organizationId: "org-1", createdBy: "user-1" }),
+        expect.objectContaining({ name: "Projeto recém-criado", organizationId: "org-1", createdBy: "user-1" }),
       ),
     );
-    expect(await screen.findByText("Novo projeto")).toBeInTheDocument();
+    expect(await screen.findByText("Projeto recém-criado")).toBeInTheDocument();
   });
 
   it("changes a project's status inline and persists it", async () => {

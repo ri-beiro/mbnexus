@@ -1,5 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/features/auth/AuthProvider";
+import { useTheme } from "@/features/theme/useTheme";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/app/ProtectedRoute";
@@ -20,6 +21,11 @@ import { Ideas } from "@/pages/Ideas";
 import { HelpPage } from "@/pages/placeholders";
 
 export default function App() {
+  // Applies the resolved theme to <html data-theme> as soon as the app
+  // boots, so the login screen (outside AppLayout, where the toggle lives)
+  // is themed too, not just pages behind auth.
+  useTheme();
+
   return (
     <BrowserRouter>
       <ToastProvider>

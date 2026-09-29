@@ -94,14 +94,14 @@ export function NotificationCenter() {
                   type="button"
                   onClick={() => handleItemClick(notification)}
                   className={cn(
-                    "flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-accent",
-                    !notification.is_read && "bg-accent/40",
+                    "flex w-full items-start gap-2 px-3 py-2 text-left text-sm hover:bg-primary/10",
+                    !notification.is_read && "bg-primary/10",
                   )}
                 >
                   {!notification.is_read && (
                     <span
                       data-testid="unread-dot"
-                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--neu-lime-solid)]"
                       aria-hidden="true"
                     />
                   )}

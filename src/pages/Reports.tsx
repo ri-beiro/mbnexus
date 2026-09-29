@@ -101,9 +101,9 @@ export function Reports() {
       {rows.length === 0 ? (
         <EmptyState icon={BarChart3} title="Nenhum dado disponível" description="Sem membros de equipe visíveis para gerar o relatório." />
       ) : (
-        <div className="overflow-x-auto rounded-lg border">
+        <div className="neu-surface overflow-x-auto p-2">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-left text-xs text-muted-foreground">
+            <thead className="text-left text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
               <tr>
                 <th className="px-3 py-2">Nome</th>
                 <th className="px-3 py-2">Total</th>
@@ -115,13 +115,13 @@ export function Reports() {
             </thead>
             <tbody>
               {rows.map(({ profile, report }) => (
-                <tr key={report.profileId} data-testid={`report-row-${report.profileId}`} className="border-t">
+                <tr key={report.profileId} data-testid={`report-row-${report.profileId}`} className="neu-divider border-t">
                   <td className="px-3 py-2 font-medium">{profile?.full_name ?? "Usuário"}</td>
-                  <td className="px-3 py-2">{report.totalTasks}</td>
-                  <td className="px-3 py-2">{report.completedTasks}</td>
-                  <td className="px-3 py-2">{report.overdueTasks}</td>
-                  <td className="px-3 py-2">{report.completionRatePercent}%</td>
-                  <td className="px-3 py-2">{report.onTimeRatePercent === null ? "—" : `${report.onTimeRatePercent}%`}</td>
+                  <td className="px-3 py-2 font-mono">{report.totalTasks}</td>
+                  <td className="px-3 py-2 font-mono">{report.completedTasks}</td>
+                  <td className="px-3 py-2 font-mono">{report.overdueTasks}</td>
+                  <td className="px-3 py-2 font-mono">{report.completionRatePercent}%</td>
+                  <td className="px-3 py-2 font-mono">{report.onTimeRatePercent === null ? "—" : `${report.onTimeRatePercent}%`}</td>
                 </tr>
               ))}
             </tbody>

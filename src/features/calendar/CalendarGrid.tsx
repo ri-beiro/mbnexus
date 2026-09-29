@@ -7,6 +7,7 @@ interface CalendarGridProps {
   month: number;
   items: CalendarItem[];
   onItemDateChange: (id: string, newDate: string) => void;
+  onItemClick: (item: CalendarItem) => void;
 }
 
 const KIND_LABELS: Record<CalendarItemKind, string> = {
@@ -25,25 +26,29 @@ const KIND_DOT_CLASS: Record<CalendarItemKind, string> = {
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-function CalendarItemChip({ item }: { item: CalendarItem }) {
+function CalendarItemChip({ item, onItemClick }: { item: CalendarItem; onItemClick: () => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: item.id });
 
   return (
     <div
       ref={setNodeRef}
       style={transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined}
-      className={cn(
-        "cursor-grab rounded border bg-card px-1.5 py-1 text-[11px] leading-tight shadow-sm active:cursor-grabbing",
-        isDragging && "z-10 opacity-70 shadow-md",
-      )}
+      className={cn("neu-surface-sm cursor-grab active:cursor-grabbing", isDragging && "z-10 opacity-70")}
       {...attributes}
       {...listeners}
     >
-      <div className="flex items-center gap-1">
-        <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", KIND_DOT_CLASS[item.kind])} />
-        <span className="text-muted-foreground">{KIND_LABELS[item.kind]}</span>
-      </div>
-      <p className="truncate font-medium">{item.title}</p>
+      <button
+        type="button"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onItemClick}
+        className="w-full px-1.5 py-1 text-left text-[11px] leading-tight"
+      >
+        <div className="flex items-center gap-1">
+          <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", KIND_DOT_CLASS[item.kind])} />
+          <span className="text-muted-foreground">{KIND_LABELS[item.kind]}</span>
+        </div>
+        <p className="truncate font-medium">{item.title}</p>
+      </button>
     </div>
   );
 }
@@ -53,11 +58,13 @@ function CalendarDayCell({
   inCurrentMonth,
   items,
   onItemDateChange,
+  onItemClick,
 }: {
   date: string;
   inCurrentMonth: boolean;
   items: CalendarItem[];
   onItemDateChange: (id: string, newDate: string) => void;
+  onItemClick: (item: CalendarItem) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: date });
   const dayNumber = Number(date.slice(8, 10));
@@ -67,15 +74,15 @@ function CalendarDayCell({
       ref={setNodeRef}
       data-testid={`calendar-day-${date}`}
       className={cn(
-        "flex min-h-24 flex-col gap-1 border p-1.5",
-        !inCurrentMonth && "bg-muted/30 text-muted-foreground",
-        isOver && "ring-2 ring-primary/50",
+        "neu-divider flex min-h-24 flex-col gap-1 border p-1.5",
+        !inCurrentMonth && "text-muted-foreground",
+        isOver && "neu-focus",
       )}
     >
-      <span className="text-xs font-medium">{dayNumber}</span>
+      <span className="font-mono text-xs font-medium">{dayNumber}</span>
       <div className="flex flex-col gap-1">
         {items.map((item) => (
-          <CalendarItemChip key={item.id} item={item} />
+          <CalendarItemChip key={item.id} item={item} onItemClick={() => onItemClick(item)} />
         ))}
       </div>
       {items.length > 0 && (
@@ -100,7 +107,7 @@ function CalendarDayCell({
   );
 }
 
-export function CalendarGrid({ year, month, items, onItemDateChange }: CalendarGridProps) {
+export function CalendarGrid({ year, month, items, onItemDateChange, onItemClick }: CalendarGridProps) {
   const cells = buildMonthGrid(year, month);
   const grouped = groupItemsByDate(items);
 
@@ -113,9 +120,9 @@ export function CalendarGrid({ year, month, items, onItemDateChange }: CalendarG
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div className="grid grid-cols-7 border-l border-t text-sm">
+      <div className="neu-surface grid grid-cols-7 overflow-hidden p-1 text-sm">
         {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="border-b border-r bg-muted/40 px-1.5 py-1 text-xs font-medium text-muted-foreground">
+          <div key={label} className="neu-divider border-b px-1.5 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
             {label}
           </div>
         ))}
@@ -126,6 +133,7 @@ export function CalendarGrid({ year, month, items, onItemDateChange }: CalendarG
             inCurrentMonth={cell.inCurrentMonth}
             items={grouped[cell.date] ?? []}
             onItemDateChange={onItemDateChange}
+            onItemClick={onItemClick}
           />
         ))}
       </div>

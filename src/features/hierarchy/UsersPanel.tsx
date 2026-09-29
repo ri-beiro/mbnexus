@@ -39,9 +39,9 @@ export function UsersPanel() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="neu-surface flex flex-col gap-2 p-4">
       {data.profiles.map((p) => (
-        <div key={p.id} className="flex flex-wrap items-center gap-3 rounded-md border px-3 py-2">
+        <div key={p.id} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
           <Avatar>
             <AvatarFallback>{p.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>

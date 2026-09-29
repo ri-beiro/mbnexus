@@ -7,6 +7,7 @@ import { computePersonWorkload, type WorkloadLevel } from "@/features/workload/w
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { cn } from "@/lib/utils";
 import type { Profile, Team as TeamRow, TeamMember } from "@/types/database";
 
 const LEVEL_LABELS: Record<WorkloadLevel, string> = {
@@ -87,26 +88,26 @@ export function Team() {
       {rows.length === 0 ? (
         <EmptyState icon={Users} title="Nenhum membro na sua estrutura ainda" />
       ) : (
-        <div className="space-y-2">
+        <div className="neu-surface flex flex-col gap-2 p-4">
           {rows.map(({ member, profile, team, workload, completedCount }) => (
-            <div key={member.id} data-testid={`team-row-${member.profile_id}`} className="rounded-md border p-3">
+            <div key={member.id} data-testid={`team-row-${member.profile_id}`} className="neu-sunken px-3.5 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-sm font-medium">{profile?.full_name ?? "Usuário"}</p>
                   <p className="text-xs text-muted-foreground">{team?.name ?? "Sem equipe"}</p>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>{workload.openTaskCount} abertas</span>
-                  <span className={workload.overdueTaskCount > 0 ? "font-medium text-destructive" : undefined}>
+                  <span className="font-mono">{workload.openTaskCount} abertas</span>
+                  <span className={cn("font-mono", workload.overdueTaskCount > 0 && "font-medium text-destructive")}>
                     {workload.overdueTaskCount} atrasadas
                   </span>
-                  <span>{completedCount} concluídas</span>
+                  <span className="font-mono">{completedCount} concluídas</span>
                   <Badge variant={LEVEL_BADGE_VARIANT[workload.level]}>{LEVEL_LABELS[workload.level]}</Badge>
                 </div>
               </div>
-              <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="neu-sunken mt-2 h-2 w-full overflow-hidden rounded-full p-0.5">
                 <div
-                  className="h-full bg-primary transition-all"
+                  className="h-full rounded-full bg-[var(--neu-lime-solid)] transition-all"
                   style={{ width: `${Math.min(workload.percent, 100)}%` }}
                 />
               </div>

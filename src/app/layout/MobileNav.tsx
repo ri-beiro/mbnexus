@@ -13,8 +13,9 @@ const ITEMS = [
 // Seção 40: no mobile a sidebar vira um menu inferior.
 export function MobileNav() {
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t bg-background py-1.5 md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+    <nav
+      className="neu-surface fixed inset-x-3 bottom-3 z-40 flex items-center justify-around !rounded-3xl py-2 md:hidden"
+      style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 8px)" }}
     >
       {ITEMS.map((item) => {
         const Icon = item.icon;
@@ -24,8 +25,8 @@ export function MobileNav() {
             to={item.to}
             className={({ isActive }) =>
               cn(
-                "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] text-muted-foreground",
-                isActive && "text-primary",
+                "flex flex-col items-center gap-0.5 px-3 py-1 text-[10px] text-muted-foreground transition-colors",
+                isActive && "text-[var(--neu-lime-solid)]",
               )
             }
           >

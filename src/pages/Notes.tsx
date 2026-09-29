@@ -3,6 +3,7 @@ import { StickyNote } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { NoteTree } from "@/features/notes/NoteTree";
 import { NoteEditor } from "@/features/notes/NoteEditor";
+import { CreateNoteDialog } from "@/features/notes/CreateNoteDialog";
 import { useToast } from "@/components/ui/toast-provider";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,7 @@ export function Notes() {
   const [blocks, setBlocks] = useState<NoteBlock[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const reloadNotes = useCallback(async () => {
     try {
@@ -63,15 +65,9 @@ export function Notes() {
       );
   }, [selectedId, toast]);
 
-  async function handleCreateRoot() {
-    if (!profile) return;
-    try {
-      const created = await createNote({ organizationId: profile.organization_id, ownerProfileId: profile.id });
-      await reloadNotes();
-      setSelectedId(created.id);
-    } catch (err) {
-      toast({ title: "Não foi possível criar a página", description: err instanceof Error ? err.message : undefined, variant: "destructive" });
-    }
+  async function handleNoteCreated(created: Note) {
+    await reloadNotes();
+    setSelectedId(created.id);
   }
 
   async function handleCreateChild(parentId: string) {
@@ -117,10 +113,29 @@ export function Notes() {
   const selectedNote = notes.find((n) => n.id === selectedId) ?? null;
 
   return (
-    <div className="grid grid-cols-[240px_1fr] gap-6">
-      <div className="border-r pr-4">
-        {loading ? <Skeleton className="h-48" /> : (
-          <NoteTree notes={notes} selectedId={selectedId} onSelect={setSelectedId} onCreateRoot={handleCreateRoot} onCreateChild={handleCreateChild} />
+    <div className="grid grid-cols-[260px_1fr] gap-6">
+      {profile && (
+        <CreateNoteDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          organizationId={profile.organization_id}
+          ownerProfileId={profile.id}
+          notes={notes}
+          onCreated={handleNoteCreated}
+        />
+      )}
+
+      <div className="neu-surface-sm p-3">
+        {loading ? (
+          <Skeleton className="h-48" />
+        ) : (
+          <NoteTree
+            notes={notes}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onCreateRoot={() => setCreateOpen(true)}
+            onCreateChild={handleCreateChild}
+          />
         )}
       </div>
 

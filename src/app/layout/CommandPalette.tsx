@@ -37,7 +37,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Ir para…"
-          className="w-full border-b bg-transparent px-4 py-3 text-sm outline-none"
+          className="neu-divider w-full border-b bg-transparent px-4 py-3 text-sm outline-none"
         />
         <div className="max-h-80 overflow-y-auto p-2">
           {results.length === 0 && <p className="px-3 py-6 text-center text-sm text-muted-foreground">Nenhum resultado.</p>}
@@ -51,7 +51,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   onOpenChange(false);
                   setQuery("");
                 }}
-                className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm hover:bg-accent"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-[rgba(190,249,27,0.1)] hover:text-[var(--neu-lime-solid)]"
               >
                 <Icon className="h-4 w-4 text-muted-foreground" />
                 {item.label}
@@ -59,7 +59,7 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
             );
           })}
         </div>
-        <p className="border-t px-4 py-2 text-xs text-muted-foreground">
+        <p className="neu-divider border-t px-4 py-2 text-xs text-muted-foreground">
           A busca por tarefas, projetos e pessoas chega nas próximas fases.
         </p>
       </DialogContent>

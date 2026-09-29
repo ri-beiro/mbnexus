@@ -187,7 +187,7 @@ export function TaskDetailPanel({
 
   if (loading) {
     return (
-      <div className="space-y-2 border-t pt-3">
+      <div className="neu-divider space-y-2 border-t pt-3">
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-16" />
       </div>
@@ -195,13 +195,13 @@ export function TaskDetailPanel({
   }
 
   return (
-    <div className="grid gap-4 border-t pt-3 md:grid-cols-2">
+    <div className="neu-divider grid gap-4 border-t pt-3 md:grid-cols-2">
       <div className="space-y-2">
-        <h4 className="text-xs font-semibold uppercase text-muted-foreground">Responsáveis</h4>
+        <h4 className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Responsáveis</h4>
         <div className="flex flex-wrap gap-2">
           {assignees.length === 0 && <p className="text-xs text-muted-foreground">Nenhum responsável atribuído.</p>}
           {assignees.map((id) => (
-            <div key={id} className="flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
+            <div key={id} className="neu-divider flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
               <Avatar className="h-5 w-5">
                 <AvatarFallback className="text-[10px]">{profileName(profiles, id).slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
@@ -211,7 +211,7 @@ export function TaskDetailPanel({
                 onClick={() => handleRemoveAssignee(id)}
                 aria-label={`Remover ${profileName(profiles, id)}`}
                 disabled={busy}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-[var(--neu-lime-solid)]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -223,7 +223,7 @@ export function TaskDetailPanel({
           value=""
           disabled={busy}
           onChange={(e) => handleAddAssignee(e.target.value)}
-          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+          className="neu-divider neu-select h-9 w-full rounded-full border bg-transparent px-3 text-xs outline-none focus-visible:neu-focus"
         >
           <option value="" disabled>
             Adicionar responsável…
@@ -237,13 +237,13 @@ export function TaskDetailPanel({
             ))}
         </select>
 
-        <h4 className="mt-4 text-xs font-semibold uppercase text-muted-foreground">Repetição</h4>
+        <h4 className="mt-4 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Repetição</h4>
         <select
           aria-label="Repetição"
           value={recurrence ?? ""}
           disabled={busy}
           onChange={(e) => handleRecurrenceChange(e.target.value || null)}
-          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+          className="neu-divider neu-select h-9 w-full rounded-full border bg-transparent px-3 text-xs outline-none focus-visible:neu-focus"
         >
           <option value="">Não repete</option>
           {RECURRENCE_PRESETS.map((preset) => (
@@ -253,11 +253,11 @@ export function TaskDetailPanel({
           ))}
         </select>
 
-        <h4 className="mt-4 text-xs font-semibold uppercase text-muted-foreground">Subtarefas</h4>
+        <h4 className="mt-4 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Subtarefas</h4>
         {subtasks.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma subtarefa ainda.</p>}
         <ul className="space-y-1">
           {subtasks.map((s) => (
-            <li key={s.id} className="flex items-center justify-between gap-2 rounded-md border px-2 py-1.5 text-sm">
+            <li key={s.id} className="neu-divider flex items-center justify-between gap-2 rounded-xl border px-2.5 py-1.5 text-sm">
               <span>{s.title}</span>
               <Badge variant="secondary">{STATUS_LABELS[s.status]}</Badge>
             </li>
@@ -280,13 +280,13 @@ export function TaskDetailPanel({
       </div>
 
       <div className="space-y-2">
-        <h4 className="flex items-center gap-1.5 text-xs font-semibold uppercase text-muted-foreground">
+        <h4 className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
           <MessageSquare className="h-3.5 w-3.5" /> Comentários
         </h4>
         {comments.length === 0 && <p className="text-xs text-muted-foreground">Nenhum comentário ainda.</p>}
         <ul className="space-y-2">
           {comments.map((c) => (
-            <li key={c.id} className="rounded-md border px-2.5 py-2 text-sm">
+            <li key={c.id} className="neu-divider rounded-xl border px-2.5 py-2 text-sm">
               <p className="text-xs font-medium text-muted-foreground">{profileName(profiles, c.author_id)}</p>
               <p>{c.body}</p>
             </li>

@@ -51,7 +51,7 @@ export function NotificationPreferencesPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+      <div className="neu-sunken flex items-center justify-between gap-3 p-3.5">
         <div>
           <Label htmlFor="pref-in-app">Notificações no aplicativo</Label>
           <p className="text-xs text-muted-foreground">Sino no topo e central de notificações.</p>
@@ -61,11 +61,11 @@ export function NotificationPreferencesPanel() {
           type="checkbox"
           checked={prefs.in_app_enabled}
           onChange={(e) => handleToggle("inAppEnabled", e.target.checked)}
-          className="h-4 w-4"
+          className="h-4 w-4 accent-[var(--neu-lime-solid)]"
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3 rounded-md border p-3">
+      <div className="neu-sunken flex items-center justify-between gap-3 p-3.5">
         <div>
           <Label htmlFor="pref-email">Notificações por e-mail</Label>
           <p className="text-xs text-muted-foreground">Envio via Microsoft Graph / SMTP Locaweb.</p>
@@ -75,7 +75,7 @@ export function NotificationPreferencesPanel() {
           type="checkbox"
           checked={prefs.email_enabled}
           onChange={(e) => handleToggle("emailEnabled", e.target.checked)}
-          className="h-4 w-4"
+          className="h-4 w-4 accent-[var(--neu-lime-solid)]"
         />
       </div>
     </div>

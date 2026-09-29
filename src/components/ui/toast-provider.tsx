@@ -50,9 +50,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               key={t.id}
               role="status"
               className={cn(
-                "pointer-events-auto flex items-start gap-3 rounded-lg border bg-card p-4 text-card-foreground shadow-lg animate-in slide-in-from-bottom-2 fade-in-0",
-                t.variant === "destructive" && "border-destructive/40",
-                t.variant === "success" && "border-success/40",
+                "neu-surface-sm pointer-events-auto flex items-start gap-3 p-4 text-card-foreground animate-in slide-in-from-bottom-2 fade-in-0",
               )}
             >
               <Icon
@@ -67,7 +65,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <p className="text-sm font-medium">{t.title}</p>
                 {t.description && <p className="mt-0.5 text-sm text-muted-foreground">{t.description}</p>}
               </div>
-              <button onClick={() => dismiss(t.id)} className="text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => dismiss(t.id)}
+                className="text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
+              >
                 <X className="h-4 w-4" />
               </button>
             </div>

@@ -66,10 +66,10 @@ export function HierarchyTree() {
           {data.managementUnits.map((mu) => {
             const departments = data.departments.filter((d) => d.management_unit_id === mu.id);
             return (
-              <div key={mu.id} className="rounded-lg border p-4">
+              <div key={mu.id} className="neu-surface-sm p-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Building2 className="h-4 w-4 text-primary" />
+                    <Building2 className="h-4 w-4 text-[var(--neu-lime-solid)]" />
                     <span className="font-medium">{mu.name}</span>
                     {!mu.is_active && <Badge variant="secondary">Inativa</Badge>}
                   </div>
@@ -80,12 +80,12 @@ export function HierarchyTree() {
                   )}
                 </div>
 
-                <div className="ml-6 mt-3 space-y-2 border-l pl-4">
+                <div className="neu-divider ml-6 mt-3 space-y-2 border-l pl-4">
                   {departments.length === 0 && <p className="text-xs text-muted-foreground">Sem coordenações.</p>}
                   {departments.map((dept) => {
                     const teams = data.teams.filter((t) => t.department_id === dept.id);
                     return (
-                      <div key={dept.id} className="rounded-md border p-3">
+                      <div key={dept.id} className="neu-sunken p-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium">{dept.name}</span>
                           {canManage && (

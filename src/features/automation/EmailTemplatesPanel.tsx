@@ -40,7 +40,7 @@ function TemplateRow({ template, onSave, onDelete }: TemplateRowProps) {
   }
 
   return (
-    <li data-testid={`template-row-${template.id}`} className="space-y-2 rounded-md border p-3">
+    <li data-testid={`template-row-${template.id}`} className="neu-sunken space-y-2 p-3.5">
       <div className="flex items-center justify-between gap-2">
         <p className="text-sm font-medium">{template.key}</p>
         <Button
@@ -59,7 +59,7 @@ function TemplateRow({ template, onSave, onDelete }: TemplateRowProps) {
         onChange={(e) => setBodyHtml(e.target.value)}
         placeholder="Corpo em HTML…"
         rows={3}
-        className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
+        className="neu-sunken w-full border-0 bg-transparent px-3.5 py-2 text-sm outline-none focus-visible:neu-focus"
       />
       <Button type="button" size="sm" onClick={handleSave} disabled={!dirty || saving}>
         Salvar
@@ -159,7 +159,7 @@ export function EmailTemplatesPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="space-y-2 rounded-lg border p-3">
+      <div className="neu-surface-sm space-y-2 p-3">
         <div className="flex flex-wrap gap-2">
           <Input value={key} onChange={(e) => setKey(e.target.value)} placeholder="Chave (ex: tarefa_atrasada)…" disabled={creating} className="max-w-xs" />
           <Input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Assunto…" disabled={creating} className="max-w-xs" />
@@ -170,7 +170,7 @@ export function EmailTemplatesPanel() {
           placeholder="Corpo em HTML…"
           rows={3}
           disabled={creating}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm"
+          className="neu-sunken w-full border-0 bg-transparent px-3.5 py-2 text-sm outline-none focus-visible:neu-focus"
         />
         <Button
           type="button"

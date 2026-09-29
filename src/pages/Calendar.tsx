@@ -2,8 +2,9 @@ import { useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useCalendarData } from "@/features/calendar/useCalendarData";
-import { buildCalendarItems, shiftEventToDate } from "@/features/calendar/calendarLogic";
+import { buildCalendarItems, shiftEventToDate, type CalendarItem } from "@/features/calendar/calendarLogic";
 import { CalendarGrid } from "@/features/calendar/CalendarGrid";
+import { STATUS_LABELS } from "@/features/tasks/taskLabels";
 import { updateTask } from "@/repositories/taskRepository";
 import { createEvent, createTeamsMeeting, updateEvent } from "@/repositories/eventRepository";
 import { useToast } from "@/components/ui/toast-provider";
@@ -12,7 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { EventType } from "@/types/database";
+
+const KIND_LABELS: Record<CalendarItem["kind"], string> = {
+  tarefa: "Tarefa",
+  evento: "Evento",
+  reuniao: "Reunião",
+  prazo: "Prazo",
+};
 
 const EVENT_TYPE_LABELS: Record<EventType, string> = {
   event: "Evento",
@@ -37,8 +46,11 @@ export function Calendar() {
   const [quickType, setQuickType] = useState<EventType>("event");
   const [createTeamsLink, setCreateTeamsLink] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<CalendarItem | null>(null);
 
   const items = useMemo(() => buildCalendarItems(tasks, events), [tasks, events]);
+  const selectedTask = selectedItem?.kind === "tarefa" ? tasks.find((t) => t.id === selectedItem.id) : undefined;
+  const selectedEvent = selectedItem && selectedItem.kind !== "tarefa" ? events.find((e) => e.id === selectedItem.id) : undefined;
 
   function goToMonth(delta: number) {
     const next = new Date(Date.UTC(year, month + delta, 1));
@@ -135,7 +147,7 @@ export function Calendar() {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
+      <div className="neu-surface-sm flex flex-wrap items-center gap-2 p-3">
         <Input
           value={quickTitle}
           onChange={(e) => setQuickTitle(e.target.value)}
@@ -151,7 +163,7 @@ export function Calendar() {
           value={quickType}
           onChange={(e) => setQuickType(e.target.value as EventType)}
           disabled={creating}
-          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          className="neu-sunken neu-select h-9 border-0 px-3 text-sm outline-none focus-visible:neu-focus"
         >
           {(Object.keys(EVENT_TYPE_LABELS) as EventType[]).map((type) => (
             <option key={type} value={type}>
@@ -179,12 +191,71 @@ export function Calendar() {
         </Button>
       </div>
 
+      <Dialog open={selectedItem !== null} onOpenChange={(open) => !open && setSelectedItem(null)}>
+        <DialogContent className="max-w-sm">
+          {selectedItem && (
+            <>
+              <DialogHeader>
+                <DialogTitle>{selectedItem.title}</DialogTitle>
+                <DialogDescription>
+                  {KIND_LABELS[selectedItem.kind]} · {selectedItem.date}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-2 text-sm">
+                {selectedTask && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Status</span>
+                      <span>{STATUS_LABELS[selectedTask.status]}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Progresso</span>
+                      <span className="font-mono">{selectedTask.progress}%</span>
+                    </div>
+                    {selectedTask.description && <p className="text-muted-foreground">{selectedTask.description}</p>}
+                  </>
+                )}
+                {selectedEvent && (
+                  <>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Início</span>
+                      <span className="font-mono">{new Date(selectedEvent.starts_at).toLocaleString("pt-BR")}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-muted-foreground">Fim</span>
+                      <span className="font-mono">{new Date(selectedEvent.ends_at).toLocaleString("pt-BR")}</span>
+                    </div>
+                    {selectedEvent.location && (
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Local</span>
+                        <span>{selectedEvent.location}</span>
+                      </div>
+                    )}
+                    {selectedEvent.teams_join_url && (
+                      <a
+                        href={selectedEvent.teams_join_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-[var(--neu-lime-solid)] underline"
+                      >
+                        Entrar na reunião do Teams
+                      </a>
+                    )}
+                    {selectedEvent.description && <p className="text-muted-foreground">{selectedEvent.description}</p>}
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {loading ? (
         <Skeleton className="h-96" />
       ) : error ? (
         <EmptyState icon={CalendarDays} title="Erro ao carregar o calendário" description={error} />
       ) : (
-        <CalendarGrid year={year} month={month} items={items} onItemDateChange={handleItemDateChange} />
+        <CalendarGrid year={year} month={month} items={items} onItemDateChange={handleItemDateChange} onItemClick={setSelectedItem} />
       )}
     </div>
   );

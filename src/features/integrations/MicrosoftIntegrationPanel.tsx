@@ -71,7 +71,7 @@ export function MicrosoftIntegrationPanel() {
           checked={isEnabled}
           onChange={(e) => setIsEnabled(e.target.checked)}
           disabled={saving}
-          className="h-4 w-4"
+          className="h-4 w-4 accent-[var(--neu-lime-solid)]"
         />
         <Label htmlFor="ms-integration-enabled">Ativar integração Microsoft 365</Label>
       </div>

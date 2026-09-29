@@ -20,8 +20,9 @@ function NavRow({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
       to={item.to}
       className={({ isActive }) =>
         cn(
-          "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-sidebar-foreground/80 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground",
-          isActive && "bg-sidebar-accent text-sidebar-foreground",
+          "flex items-center gap-3 rounded-full px-3.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-all duration-200 hover:bg-[rgba(190,249,27,0.09)] hover:text-[var(--neu-lime-solid)]",
+          isActive &&
+            "bg-primary text-primary-foreground font-semibold shadow-[6px_6px_12px_var(--neu-d),-4px_-4px_10px_var(--neu-l)] hover:bg-primary hover:text-primary-foreground",
           collapsed && "justify-center px-0",
         )
       }
@@ -53,23 +54,30 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "hidden shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground transition-[width] duration-150 md:flex",
-        collapsed ? "w-16" : "w-60",
+        "hidden shrink-0 flex-col bg-sidebar text-sidebar-foreground transition-[width] duration-200 md:flex",
+        collapsed ? "w-20" : "w-64",
       )}
     >
-      <div className={cn("flex h-14 items-center gap-2 px-4", collapsed && "justify-center px-0")}>
-        <Layers className="h-5 w-5 text-primary" />
+      <div className={cn("flex h-16 items-center gap-2.5 px-5", collapsed && "justify-center px-0")}>
+        <div className="neu-surface-sm flex h-9 w-9 shrink-0 items-center justify-center">
+          <Layers className="h-4 w-4 text-[var(--neu-lime-solid)]" />
+        </div>
         {!collapsed && <span className="text-sm font-semibold">MB Nexus</span>}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-2">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
         {PRIMARY_NAV.map((item) => (
           <NavRow key={item.to} item={item} collapsed={collapsed} />
         ))}
 
         {managementItems.length > 0 && (
           <>
-            <div className={cn("mt-4 mb-1 px-3 text-xs font-semibold uppercase text-sidebar-foreground/40", collapsed && "hidden")}>
+            <div
+              className={cn(
+                "mb-1 mt-4 px-3.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]",
+                collapsed && "hidden",
+              )}
+            >
               Gestão
             </div>
             {managementItems.map((item) => (
@@ -79,11 +87,11 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="space-y-1 border-t border-sidebar-border px-2 py-2">
+      <div className="space-y-1 px-3 py-3">
         <NavRow item={SETTINGS_NAV} collapsed={collapsed} />
         <button
           onClick={toggle}
-          className="flex w-full items-center justify-center gap-2 rounded-md px-3 py-2 text-sm text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="flex w-full items-center justify-center gap-2 rounded-full px-3.5 py-2 text-sm text-sidebar-foreground/60 transition-colors hover:bg-[rgba(190,249,27,0.09)] hover:text-[var(--neu-lime-solid)]"
         >
           {collapsed ? <ChevronsRight className="h-4 w-4" /> : <ChevronsLeft className="h-4 w-4" />}
         </button>

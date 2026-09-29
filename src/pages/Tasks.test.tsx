@@ -26,6 +26,10 @@ vi.mock("@/repositories/profileRepository", () => ({
   listOrgProfiles: vi.fn().mockResolvedValue([]),
 }));
 
+vi.mock("@/repositories/projectRepository", () => ({
+  listProjects: vi.fn().mockResolvedValue([]),
+}));
+
 import { Tasks } from "@/pages/Tasks";
 import { createTask, listTasks, updateTask } from "@/repositories/taskRepository";
 
@@ -106,20 +110,18 @@ describe("Tasks page", () => {
     expect(screen.getByText("Revisar contrato")).toBeInTheDocument();
   });
 
-  it("creates a task from the quick-create input and shows it in the list", async () => {
+  it("creates a task through the creation dialog and shows it in the list", async () => {
     const user = userEvent.setup();
     mockListTasks.mockResolvedValueOnce([]);
-    mockCreateTask.mockResolvedValue(
-      makeRow({ id: "new-1", title: "Nova tarefa rápida" }) as never,
-    );
+    mockCreateTask.mockResolvedValue(makeRow({ id: "new-1", title: "Nova tarefa rápida" }) as never);
     mockListTasks.mockResolvedValueOnce([makeRow({ id: "new-1", title: "Nova tarefa rápida" })]);
 
     renderPage();
     await screen.findByText(/nenhuma tarefa/i);
 
-    const input = screen.getByPlaceholderText(/nova tarefa/i);
-    await user.type(input, "Nova tarefa rápida");
-    await user.keyboard("{Enter}");
+    await user.click(screen.getByRole("button", { name: /nova tarefa/i }));
+    await user.type(await screen.findByLabelText(/^título$/i), "Nova tarefa rápida");
+    await user.click(screen.getByRole("button", { name: /criar tarefa/i }));
 
     await waitFor(() =>
       expect(mockCreateTask).toHaveBeenCalledWith(

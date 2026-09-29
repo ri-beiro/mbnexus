@@ -164,7 +164,12 @@ export function NoteEditor({ note, blocks, onSaveTitle, onAddBlock, onSaveBlockC
                 <TextBlock block={block} onSave={(c) => handleSaveBlock(block.id, c)} multiline={false} className="text-lg font-semibold" />
               )}
               {block.type === "code" && (
-                <TextBlock block={block} onSave={(c) => handleSaveBlock(block.id, c)} multiline className="rounded bg-muted p-2 font-mono text-sm" />
+                <TextBlock
+                  block={block}
+                  onSave={(c) => handleSaveBlock(block.id, c)}
+                  multiline
+                  className="neu-sunken rounded-xl p-2.5 font-mono text-sm"
+                />
               )}
               {block.type === "checklist" && <ChecklistBlock block={block} onSave={(c) => handleSaveBlock(block.id, c)} />}
             </div>

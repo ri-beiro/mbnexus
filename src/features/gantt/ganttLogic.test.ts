@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildTimelineDays, computeBarStyle, resolveTimelineRange } from "@/features/gantt/ganttLogic";
+import { buildMonthSpans, buildTimelineDays, computeBarStyle, resolveTimelineRange } from "@/features/gantt/ganttLogic";
 
 describe("resolveTimelineRange", () => {
   it("returns null for an empty task list", () => {
@@ -51,5 +51,24 @@ describe("computeBarStyle", () => {
   it("treats a missing start_date as a single-day bar on the due date", () => {
     const style = computeBarStyle({ start_date: null, due_date: "2026-09-01" }, timelineStart, dayWidth);
     expect(style).toEqual({ leftPx: 0, widthPx: 24 });
+  });
+});
+
+describe("buildMonthSpans", () => {
+  it("groups a single month's days into one span", () => {
+    const days = buildTimelineDays("2026-09-01", "2026-09-04");
+    expect(buildMonthSpans(days)).toEqual([{ label: "setembro 2026", dayCount: 4 }]);
+  });
+
+  it("splits days across a month boundary into separate spans in order", () => {
+    const days = buildTimelineDays("2026-09-29", "2026-10-02");
+    expect(buildMonthSpans(days)).toEqual([
+      { label: "setembro 2026", dayCount: 2 },
+      { label: "outubro 2026", dayCount: 2 },
+    ]);
+  });
+
+  it("returns an empty array for an empty day list", () => {
+    expect(buildMonthSpans([])).toEqual([]);
   });
 });

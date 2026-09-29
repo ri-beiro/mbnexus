@@ -5,14 +5,14 @@ import { useProjectsData } from "@/features/projects/useProjectsData";
 import { filterProjects, type ProjectFilters } from "@/features/projects/projectLogic";
 import { PROJECT_STATUS_BADGE_VARIANT, PROJECT_STATUS_LABELS, PROJECT_STATUS_ORDER } from "@/features/projects/projectLabels";
 import { ProjectDetailPanel } from "@/features/projects/ProjectDetailPanel";
-import { createProject, updateProject } from "@/repositories/projectRepository";
+import { CreateProjectDialog } from "@/features/projects/CreateProjectDialog";
+import { updateProject } from "@/repositories/projectRepository";
 import { useToast } from "@/components/ui/toast-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { cn } from "@/lib/utils";
 import type { ProjectStatus } from "@/types/database";
 
 function StatusFilterBar({ active, onToggle }: { active: Set<ProjectStatus>; onToggle: (status: ProjectStatus) => void }) {
@@ -40,8 +40,7 @@ export function Projects() {
 
   const [statusFilter, setStatusFilter] = useState<Set<ProjectStatus>>(new Set());
   const [search, setSearch] = useState("");
-  const [quickName, setQuickName] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filters: ProjectFilters = useMemo(
@@ -60,25 +59,6 @@ export function Projects() {
     });
   }
 
-  async function handleQuickCreate() {
-    const name = quickName.trim();
-    if (!name || !profile) return;
-    setCreating(true);
-    try {
-      await createProject({ organizationId: profile.organization_id, name, createdBy: profile.id });
-      setQuickName("");
-      await reload();
-    } catch (err) {
-      toast({
-        title: "Não foi possível criar o projeto",
-        description: err instanceof Error ? err.message : undefined,
-        variant: "destructive",
-      });
-    } finally {
-      setCreating(false);
-    }
-  }
-
   async function handleStatusChange(projectId: string, status: ProjectStatus) {
     try {
       await updateProject(projectId, { status });
@@ -94,26 +74,27 @@ export function Projects() {
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Projetos</h1>
-        <p className="text-sm text-muted-foreground">Todos os projetos que você pode ver, com filtros.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Projetos</h1>
+          <p className="text-sm text-muted-foreground">Todos os projetos que você pode ver, com filtros.</p>
+        </div>
+        <Button type="button" onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4" /> Novo projeto
+        </Button>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border p-3">
-        <div className="flex items-center gap-2">
-          <Input
-            value={quickName}
-            onChange={(e) => setQuickName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleQuickCreate();
-            }}
-            placeholder="Novo projeto… pressione Enter para criar"
-            disabled={creating}
-          />
-          <Button type="button" onClick={handleQuickCreate} disabled={creating || !quickName.trim()}>
-            <Plus className="h-4 w-4" /> Adicionar
-          </Button>
-        </div>
+      {profile && (
+        <CreateProjectDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          organizationId={profile.organization_id}
+          createdBy={profile.id}
+          onCreated={reload}
+        />
+      )}
+
+      <div className="neu-surface-sm flex flex-col gap-3 p-4">
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -138,16 +119,16 @@ export function Projects() {
           description="Crie um projeto acima ou ajuste os filtros."
         />
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="neu-surface flex flex-col gap-2 p-4">
           {visibleProjects.map((project) => {
             const isExpanded = expandedId === project.id;
             return (
-              <li key={project.id} data-project-row className="rounded-md border px-3 py-2">
+              <li key={project.id} data-project-row className="neu-sunken px-3.5 py-2.5">
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setExpandedId(isExpanded ? null : project.id)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
                     aria-label={isExpanded ? "Recolher projeto" : "Expandir projeto"}
                   >
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -162,20 +143,17 @@ export function Projects() {
                     <p className="truncate text-xs text-muted-foreground">{project.team_name ?? "Sem equipe"}</p>
                   </button>
 
-                  <span className="text-xs text-muted-foreground">{project.computedProgress}%</span>
+                  <span className="font-mono text-xs text-muted-foreground">{project.computedProgress}%</span>
 
                   <Badge variant={PROJECT_STATUS_BADGE_VARIANT[project.status]}>{PROJECT_STATUS_LABELS[project.status]}</Badge>
 
-                  {project.due_date && <span className="text-xs text-muted-foreground">{project.due_date}</span>}
+                  {project.due_date && <span className="font-mono text-xs text-muted-foreground">{project.due_date}</span>}
 
                   <select
                     aria-label="Status do projeto"
                     value={project.status}
                     onChange={(e) => handleStatusChange(project.id, e.target.value as ProjectStatus)}
-                    className={cn(
-                      "h-8 rounded-md border border-input bg-background px-2 text-xs",
-                      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    )}
+                    className="neu-select h-9 rounded-full border-0 bg-black/10 px-3 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
                   >
                     {PROJECT_STATUS_ORDER.map((status) => (
                       <option key={status} value={status}>

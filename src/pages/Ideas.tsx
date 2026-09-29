@@ -97,7 +97,7 @@ export function Ideas() {
         <p className="text-sm text-muted-foreground">Registre, acompanhe e transforme ideias em projetos.</p>
       </div>
 
-      <div className="flex items-center gap-2 rounded-lg border p-3">
+      <div className="neu-surface-sm flex items-center gap-2 p-3">
         <Input
           value={quickTitle}
           onChange={(e) => setQuickTitle(e.target.value)}
@@ -115,12 +115,12 @@ export function Ideas() {
       {ideas.length === 0 ? (
         <EmptyState icon={Lightbulb} title="Nenhuma ideia registrada ainda" description="Registre a primeira ideia acima." />
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="neu-surface flex flex-col gap-2 p-4">
           {ideas.map((idea) => {
             const next = nextIdeaStatus(idea.status);
             const canConvert = idea.converted_project_id === null && IDEA_STATUS_ORDER.indexOf(idea.status) >= APPROVED_INDEX;
             return (
-              <li key={idea.id} data-testid={`idea-row-${idea.id}`} className="flex flex-wrap items-center gap-3 rounded-md border px-3 py-2">
+              <li key={idea.id} data-testid={`idea-row-${idea.id}`} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
                 <div className="min-w-40 flex-1">
                   <p className="text-sm font-medium">{idea.title}</p>
                   {idea.problem && <p className="truncate text-xs text-muted-foreground">{idea.problem}</p>}

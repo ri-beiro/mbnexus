@@ -15,10 +15,19 @@ vi.mock("@/repositories/taskRepository", () => ({
   listTasks: vi.fn(),
   createTask: vi.fn(),
   updateTask: vi.fn(),
+  listSubtasks: vi.fn().mockResolvedValue([]),
+  listTaskComments: vi.fn().mockResolvedValue([]),
+  addTaskComment: vi.fn(),
+  addTaskAssignee: vi.fn(),
+  removeTaskAssignee: vi.fn(),
 }));
 
 vi.mock("@/repositories/profileRepository", () => ({
   listOrgProfiles: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/repositories/projectRepository", () => ({
+  listProjects: vi.fn().mockResolvedValue([]),
 }));
 
 import { Kanban } from "@/pages/Kanban";
@@ -86,5 +95,17 @@ describe("Kanban page", () => {
     await user.selectOptions(select, "concluido");
 
     await waitFor(() => expect(mockUpdateTask).toHaveBeenCalledWith("1", { status: "concluido" }));
+  });
+
+  it("opens the task detail dialog when a card's details button is clicked", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })]);
+
+    renderPage();
+    const card = (await screen.findByText("Corrigir bug")).closest("[data-kanban-card]") as HTMLElement;
+    await user.click(within(card).getByRole("button", { name: /ver detalhes de corrigir bug/i }));
+
+    const dialog = await screen.findByRole("dialog");
+    expect(within(dialog).getByText("Corrigir bug")).toBeInTheDocument();
   });
 });

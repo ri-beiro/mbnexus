@@ -5,14 +5,14 @@ import { useTasksData } from "@/features/tasks/useTasksData";
 import { filterTasks, type TaskFilters } from "@/features/tasks/taskLogic";
 import { PRIORITY_BADGE_VARIANT, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
-import { createTask, updateTask } from "@/repositories/taskRepository";
+import { CreateTaskDialog } from "@/features/tasks/CreateTaskDialog";
+import { updateTask } from "@/repositories/taskRepository";
 import { useToast } from "@/components/ui/toast-provider";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { cn } from "@/lib/utils";
 import type { TaskStatus } from "@/types/database";
 
 function StatusFilterBar({ active, onToggle }: { active: Set<TaskStatus>; onToggle: (status: TaskStatus) => void }) {
@@ -40,8 +40,7 @@ export function Tasks() {
 
   const [statusFilter, setStatusFilter] = useState<Set<TaskStatus>>(new Set());
   const [search, setSearch] = useState("");
-  const [quickTitle, setQuickTitle] = useState("");
-  const [creating, setCreating] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const filters: TaskFilters = useMemo(
@@ -58,25 +57,6 @@ export function Tasks() {
       else next.add(status);
       return next;
     });
-  }
-
-  async function handleQuickCreate() {
-    const title = quickTitle.trim();
-    if (!title || !profile) return;
-    setCreating(true);
-    try {
-      await createTask({ organizationId: profile.organization_id, title, createdBy: profile.id });
-      setQuickTitle("");
-      await reload();
-    } catch (err) {
-      toast({
-        title: "Não foi possível criar a tarefa",
-        description: err instanceof Error ? err.message : undefined,
-        variant: "destructive",
-      });
-    } finally {
-      setCreating(false);
-    }
   }
 
   async function handleStatusChange(taskId: string, status: TaskStatus) {
@@ -99,23 +79,23 @@ export function Tasks() {
           <h1 className="text-2xl font-semibold tracking-tight">Tarefas</h1>
           <p className="text-sm text-muted-foreground">Todas as tarefas que você pode ver, com filtros.</p>
         </div>
+        <Button type="button" onClick={() => setCreateOpen(true)}>
+          <Plus className="h-4 w-4" /> Nova tarefa
+        </Button>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-lg border p-3">
-        <div className="flex items-center gap-2">
-          <Input
-            value={quickTitle}
-            onChange={(e) => setQuickTitle(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") handleQuickCreate();
-            }}
-            placeholder="Nova tarefa… pressione Enter para criar"
-            disabled={creating}
-          />
-          <Button type="button" onClick={handleQuickCreate} disabled={creating || !quickTitle.trim()}>
-            <Plus className="h-4 w-4" /> Adicionar
-          </Button>
-        </div>
+      {profile && (
+        <CreateTaskDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          organizationId={profile.organization_id}
+          createdBy={profile.id}
+          profiles={profiles}
+          onCreated={reload}
+        />
+      )}
+
+      <div className="neu-surface-sm flex flex-col gap-3 p-4">
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -140,16 +120,16 @@ export function Tasks() {
           description="Crie uma tarefa acima ou ajuste os filtros."
         />
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="neu-surface flex flex-col gap-2 p-4">
           {visibleTasks.map((task) => {
             const isExpanded = expandedId === task.id;
             return (
-              <li key={task.id} data-task-row className="rounded-md border px-3 py-2">
+              <li key={task.id} data-task-row className="neu-sunken px-3.5 py-2.5">
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
                     onClick={() => setExpandedId(isExpanded ? null : task.id)}
-                    className="text-muted-foreground hover:text-foreground"
+                    className="text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
                     aria-label={isExpanded ? "Recolher tarefa" : "Expandir tarefa"}
                   >
                     {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
@@ -166,16 +146,13 @@ export function Tasks() {
 
                   <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]}>{task.priority}</Badge>
 
-                  {task.due_date && <span className="text-xs text-muted-foreground">{task.due_date}</span>}
+                  {task.due_date && <span className="font-mono text-xs text-muted-foreground">{task.due_date}</span>}
 
                   <select
                     aria-label="Status da tarefa"
                     value={task.status}
                     onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
-                    className={cn(
-                      "h-8 rounded-md border border-input bg-background px-2 text-xs",
-                      "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
-                    )}
+                    className="neu-select h-9 rounded-full border-0 bg-black/10 px-3 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
                   >
                     {STATUS_ORDER.map((status) => (
                       <option key={status} value={status}>

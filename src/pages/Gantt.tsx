@@ -81,7 +81,7 @@ export function Gantt() {
           id="gantt-project"
           value={selectedProjectId ?? ""}
           onChange={(e) => setSelectedProjectId(e.target.value || null)}
-          className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+          className="neu-sunken neu-select flex h-10 w-full border-0 px-3.5 text-sm outline-none focus-visible:neu-focus"
         >
           {projects.map((p) => (
             <option key={p.id} value={p.id}>

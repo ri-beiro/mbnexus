@@ -1,3 +1,4 @@
+import { Info } from "lucide-react";
 import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
 import { groupTasksByStatus } from "@/features/tasks/kanbanLogic";
 import { PRIORITY_BADGE_VARIANT, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
@@ -9,9 +10,18 @@ import type { TaskStatus } from "@/types/database";
 interface KanbanBoardProps {
   tasks: TaskListRow[];
   onStatusChange: (taskId: string, status: TaskStatus) => void;
+  onCardClick: (taskId: string) => void;
 }
 
-function KanbanCard({ task, onStatusChange }: { task: TaskListRow; onStatusChange: (status: TaskStatus) => void }) {
+function KanbanCard({
+  task,
+  onStatusChange,
+  onCardClick,
+}: {
+  task: TaskListRow;
+  onStatusChange: (status: TaskStatus) => void;
+  onCardClick: () => void;
+}) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
 
   return (
@@ -20,17 +30,28 @@ function KanbanCard({ task, onStatusChange }: { task: TaskListRow; onStatusChang
       data-kanban-card
       style={transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined}
       className={cn(
-        "cursor-grab space-y-1.5 rounded-md border bg-card p-2.5 text-sm shadow-sm active:cursor-grabbing",
-        isDragging && "z-10 opacity-70 shadow-md",
+        "neu-surface-sm neu-fade-up cursor-grab space-y-1.5 p-3 text-sm active:cursor-grabbing",
+        isDragging && "z-10 opacity-70",
       )}
       {...attributes}
       {...listeners}
     >
-      <p className="font-medium leading-snug">{task.title}</p>
+      <div className="flex items-start justify-between gap-1.5">
+        <p className="font-medium leading-snug">{task.title}</p>
+        <button
+          type="button"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={onCardClick}
+          aria-label={`Ver detalhes de ${task.title}`}
+          className="shrink-0 text-muted-foreground hover:text-[var(--neu-lime-solid)]"
+        >
+          <Info className="h-3.5 w-3.5" />
+        </button>
+      </div>
       <p className="truncate text-xs text-muted-foreground">{task.project_name ?? "Sem projeto"}</p>
       <div className="flex items-center justify-between gap-2">
         <Badge variant={PRIORITY_BADGE_VARIANT[task.priority]}>{task.priority}</Badge>
-        {task.due_date && <span className="text-xs text-muted-foreground">{task.due_date}</span>}
+        {task.due_date && <span className="font-mono text-xs text-muted-foreground">{task.due_date}</span>}
       </div>
       {/* Keyboard/screen-reader-accessible alternative to dragging — also
           what the automated tests exercise, since simulating real pointer
@@ -41,7 +62,7 @@ function KanbanCard({ task, onStatusChange }: { task: TaskListRow; onStatusChang
         value={task.status}
         onPointerDown={(e) => e.stopPropagation()}
         onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-        className="h-7 w-full rounded-md border border-input bg-background px-1.5 text-xs"
+        className="neu-select h-8 w-full rounded-full border-0 bg-black/10 px-2.5 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
       >
         {STATUS_ORDER.map((status) => (
           <option key={status} value={status}>
@@ -57,10 +78,12 @@ function KanbanColumn({
   status,
   tasks,
   onStatusChange,
+  onCardClick,
 }: {
   status: TaskStatus;
   tasks: TaskListRow[];
   onStatusChange: (taskId: string, status: TaskStatus) => void;
+  onCardClick: (taskId: string) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -68,30 +91,32 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       data-testid={`kanban-column-${status}`}
-      className={cn(
-        "flex w-64 shrink-0 flex-col gap-2 rounded-lg border bg-muted/30 p-2.5",
-        isOver && "ring-2 ring-primary/50",
-      )}
+      className={cn("neu-sunken flex w-64 shrink-0 flex-col gap-2 p-3", isOver && "neu-focus")}
     >
       <div className="flex items-center justify-between px-0.5">
-        <h3 className="text-xs font-semibold uppercase text-muted-foreground">{STATUS_LABELS[status]}</h3>
-        <span className="text-xs text-muted-foreground">{tasks.length}</span>
+        <h3 className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">{STATUS_LABELS[status]}</h3>
+        <span className="font-mono text-xs text-muted-foreground">{tasks.length}</span>
       </div>
       <div className="flex flex-col gap-2">
         {tasks.length === 0 && (
-          <p className="rounded-md border border-dashed p-3 text-center text-xs text-muted-foreground">
+          <p className="neu-divider rounded-xl border border-dashed p-3 text-center text-xs text-muted-foreground">
             Sem tarefas nesta coluna.
           </p>
         )}
         {tasks.map((task) => (
-          <KanbanCard key={task.id} task={task} onStatusChange={(s) => onStatusChange(task.id, s)} />
+          <KanbanCard
+            key={task.id}
+            task={task}
+            onStatusChange={(s) => onStatusChange(task.id, s)}
+            onCardClick={() => onCardClick(task.id)}
+          />
         ))}
       </div>
     </div>
   );
 }
 
-export function KanbanBoard({ tasks, onStatusChange }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onStatusChange, onCardClick }: KanbanBoardProps) {
   const columns = groupTasksByStatus(tasks);
 
   function handleDragEnd(event: DragEndEvent) {
@@ -106,7 +131,7 @@ export function KanbanBoard({ tasks, onStatusChange }: KanbanBoardProps) {
     <DndContext onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {STATUS_ORDER.map((status) => (
-          <KanbanColumn key={status} status={status} tasks={columns[status]} onStatusChange={onStatusChange} />
+          <KanbanColumn key={status} status={status} tasks={columns[status]} onStatusChange={onStatusChange} onCardClick={onCardClick} />
         ))}
       </div>
     </DndContext>

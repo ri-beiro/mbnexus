@@ -125,17 +125,20 @@ export function ProjectDetailPanel({
   }
 
   return (
-    <div className="grid gap-4 border-t pt-3 md:grid-cols-2">
+    <div className="neu-divider grid gap-4 border-t pt-3 md:grid-cols-2">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h4 className="text-xs font-semibold uppercase text-muted-foreground">Progresso</h4>
-          <span className="text-xs font-medium">{computedProgress}%</span>
+          <h4 className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Progresso</h4>
+          <span className="font-mono text-xs font-medium">{computedProgress}%</span>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-          <div className="h-full bg-primary transition-all" style={{ width: `${computedProgress}%` }} />
+        <div className="neu-sunken h-2 w-full overflow-hidden rounded-full p-0.5">
+          <div
+            className="h-full rounded-full bg-[var(--neu-lime-solid)] transition-all"
+            style={{ width: `${computedProgress}%` }}
+          />
         </div>
 
-        <h4 className="mt-4 flex items-center gap-1.5 text-xs font-semibold uppercase text-muted-foreground">
+        <h4 className="mt-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
           <ListChecks className="h-3.5 w-3.5" /> Fases
         </h4>
         {loading ? (
@@ -145,7 +148,7 @@ export function ProjectDetailPanel({
             {phases.length === 0 && <p className="text-xs text-muted-foreground">Nenhuma fase ainda.</p>}
             <ul className="space-y-1">
               {phases.map((phase) => (
-                <li key={phase.id} className="rounded-md border px-2 py-1.5 text-sm">
+                <li key={phase.id} className="neu-divider rounded-xl border px-2.5 py-1.5 text-sm">
                   {phase.name}
                 </li>
               ))}
@@ -169,11 +172,11 @@ export function ProjectDetailPanel({
       </div>
 
       <div className="space-y-2">
-        <h4 className="text-xs font-semibold uppercase text-muted-foreground">Membros</h4>
+        <h4 className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">Membros</h4>
         <div className="flex flex-wrap gap-2">
           {members.length === 0 && <p className="text-xs text-muted-foreground">Nenhum membro ainda.</p>}
           {members.map((id) => (
-            <div key={id} className="flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
+            <div key={id} className="neu-divider flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
               <Avatar className="h-5 w-5">
                 <AvatarFallback className="text-[10px]">{profileName(profiles, id).slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
@@ -183,7 +186,7 @@ export function ProjectDetailPanel({
                 onClick={() => handleRemoveMember(id)}
                 aria-label={`Remover ${profileName(profiles, id)}`}
                 disabled={busy}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-[var(--neu-lime-solid)]"
               >
                 <X className="h-3 w-3" />
               </button>
@@ -195,7 +198,7 @@ export function ProjectDetailPanel({
           value=""
           disabled={busy}
           onChange={(e) => handleAddMember(e.target.value)}
-          className="h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
+          className="neu-divider neu-select h-9 w-full rounded-full border bg-transparent px-3 text-xs outline-none focus-visible:neu-focus"
         >
           <option value="" disabled>
             Adicionar membro…

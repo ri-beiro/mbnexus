@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { CommandPalette, useCommandPalette } from "@/app/layout/CommandPalette";
 import { NotificationCenter } from "@/features/notifications/NotificationCenter";
+import { ThemeToggle } from "@/features/theme/ThemeToggle";
 
 function initials(name: string) {
   return name
@@ -38,14 +39,14 @@ export function Topbar() {
   const palette = useCommandPalette();
 
   return (
-    <header className="flex h-14 shrink-0 items-center gap-3 border-b bg-background px-4">
+    <header className="flex h-16 shrink-0 items-center gap-3 bg-background px-5">
       <button
         onClick={palette.open}
-        className="flex w-full max-w-sm items-center gap-2 rounded-md border bg-muted/40 px-3 py-1.5 text-sm text-muted-foreground hover:bg-muted"
+        className="neu-sunken flex w-full max-w-sm items-center gap-2 px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
       >
         <Search className="h-4 w-4" />
         <span className="flex-1 text-left">Buscar…</span>
-        <kbd className="rounded border bg-background px-1.5 py-0.5 text-[10px]">Ctrl K</kbd>
+        <kbd className="rounded-md bg-black/10 px-1.5 py-0.5 text-[10px] dark:bg-white/5">Ctrl K</kbd>
       </button>
       <CommandPalette open={palette.isOpen} onOpenChange={palette.setOpen} />
 
@@ -71,6 +72,8 @@ export function Topbar() {
       </Button>
 
       <NotificationCenter />
+
+      <ThemeToggle />
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

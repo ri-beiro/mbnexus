@@ -1,4 +1,5 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { GanttChart } from "@/features/gantt/GanttChart";
 import type { Task, TaskDependency } from "@/types/database";
@@ -60,5 +61,29 @@ describe("GanttChart", () => {
 
     expect(onDateChange).toHaveBeenCalledWith("1", { startDate: "2026-09-06" });
     expect(onDateChange).toHaveBeenCalledWith("1", { dueDate: "2026-09-12" });
+  });
+
+  it("shows a month header row above the day headers", () => {
+    render(
+      <GanttChart
+        tasks={[makeTask({ id: "1", title: "Levantar requisitos", start_date: "2026-09-29", due_date: "2026-10-02" })]}
+        dependencies={[]}
+        onDateChange={vi.fn()}
+      />,
+    );
+
+    expect(screen.getByText(/setembro 2026/i)).toBeInTheDocument();
+    expect(screen.getByText(/outubro 2026/i)).toBeInTheDocument();
+  });
+
+  it("opens a detail dialog with the task's info when its bar is clicked", async () => {
+    const user = userEvent.setup();
+    render(<GanttChart tasks={[makeTask({ id: "1", title: "Levantar requisitos", progress: 40 })]} dependencies={[]} onDateChange={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: /ver detalhes de levantar requisitos/i }));
+
+    expect(await screen.findByRole("dialog")).toBeInTheDocument();
+    expect(within(screen.getByRole("dialog")).getByText("Levantar requisitos")).toBeInTheDocument();
+    expect(within(screen.getByRole("dialog")).getByText(/40%/)).toBeInTheDocument();
   });
 });

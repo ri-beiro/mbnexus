@@ -112,7 +112,7 @@ export function AutomationsPanel() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border p-3">
+      <div className="neu-surface-sm flex flex-wrap items-center gap-2 p-3">
         <Input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -125,7 +125,7 @@ export function AutomationsPanel() {
           value={triggerEvent}
           onChange={(e) => setTriggerEvent(e.target.value)}
           disabled={creating}
-          className="h-9 rounded-md border border-input bg-background px-2 text-sm"
+          className="neu-sunken neu-select h-9 border-0 px-3 text-sm outline-none focus-visible:neu-focus"
         >
           {TRIGGER_OPTIONS.map((event) => (
             <option key={event} value={event}>
@@ -141,12 +141,12 @@ export function AutomationsPanel() {
       {automations.length === 0 ? (
         <EmptyState icon={Zap} title="Nenhuma automação configurada" description="Crie a primeira automação acima." />
       ) : (
-        <ul className="space-y-1.5">
+        <ul className="neu-surface flex flex-col gap-2 p-4">
           {automations.map((automation) => (
             <li
               key={automation.id}
               data-testid={`automation-row-${automation.id}`}
-              className="flex flex-wrap items-center gap-3 rounded-md border px-3 py-2"
+              className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5"
             >
               <div className="min-w-40 flex-1">
                 <p className="text-sm font-medium">{automation.name}</p>
