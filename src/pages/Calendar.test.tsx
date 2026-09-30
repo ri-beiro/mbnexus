@@ -96,16 +96,28 @@ beforeEach(() => {
 });
 
 describe("Calendar page", () => {
-  it("shows tasks and events on their due/start date", async () => {
+  it("shows tasks and events as a kind dot on their due/start date", async () => {
     mockListTasks.mockResolvedValue([makeTask({ id: "t1", title: "Entregar relatório", due_date: "2026-09-20" })]);
-    mockListEvents.mockResolvedValue([makeEvent({ id: "e1", title: "Reunião de time", starts_at: "2026-09-21T10:00:00.000Z" })]);
+    mockListEvents.mockResolvedValue([makeEvent({ id: "e1", title: "Reunião de time", starts_at: "2026-09-21T10:00:00.000Z", type: "meeting" })]);
 
     renderPage();
 
     const day20 = await screen.findByTestId("calendar-day-2026-09-20");
-    expect(within(day20).getByText("Entregar relatório")).toBeInTheDocument();
+    expect(within(day20).getByRole("button", { name: /1 tarefa/i })).toBeInTheDocument();
     const day21 = screen.getByTestId("calendar-day-2026-09-21");
-    expect(within(day21).getByText("Reunião de time")).toBeInTheDocument();
+    expect(within(day21).getByRole("button", { name: /1 reunião/i })).toBeInTheDocument();
+  });
+
+  it("opens the day's details menu and shows each item's title when its dot is clicked", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([makeTask({ id: "t1", title: "Entregar relatório", due_date: "2026-09-20" })]);
+    mockListEvents.mockResolvedValue([]);
+
+    renderPage();
+    const day20 = await screen.findByTestId("calendar-day-2026-09-20");
+    await user.click(within(day20).getByRole("button", { name: /1 tarefa/i }));
+
+    expect(await screen.findByText("Entregar relatório")).toBeInTheDocument();
   });
 
   it("creates an event from the quick-create form", async () => {

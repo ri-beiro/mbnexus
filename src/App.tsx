@@ -15,7 +15,6 @@ import { Calendar } from "@/pages/Calendar";
 import { Gantt } from "@/pages/Gantt";
 import { Notes } from "@/pages/Notes";
 import { Team } from "@/pages/Team";
-import { Dashboards } from "@/pages/Dashboards";
 import { Reports } from "@/pages/Reports";
 import { Ideas } from "@/pages/Ideas";
 import { HelpPage } from "@/pages/placeholders";
@@ -48,7 +47,7 @@ export default function App() {
                 <Route path="/gantt" element={<Gantt />} />
                 <Route path="/notes" element={<Notes />} />
                 <Route path="/ideas" element={<Ideas />} />
-                <Route path="/dashboards" element={<Dashboards />} />
+                <Route path="/dashboards" element={<Navigate to="/home" replace />} />
                 <Route path="/team" element={<Team />} />
                 <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />

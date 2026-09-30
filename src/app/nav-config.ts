@@ -1,12 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BarChart3,
-  Calendar,
   FolderKanban,
   GanttChartSquare,
   Home,
   Lightbulb,
-  LayoutDashboard,
   LayoutGrid,
   ListTodo,
   Settings,
@@ -29,11 +27,9 @@ export const PRIMARY_NAV: NavItem[] = [
   { label: "Tarefas", to: "/tasks", icon: ListTodo, shortcut: "N" },
   { label: "Kanban", to: "/kanban", icon: LayoutGrid, shortcut: "K" },
   { label: "Projetos", to: "/projects", icon: FolderKanban },
-  { label: "Calendário", to: "/calendar", icon: Calendar, shortcut: "C" },
   { label: "Gantt", to: "/gantt", icon: GanttChartSquare, shortcut: "G" },
   { label: "Notas", to: "/notes", icon: StickyNote },
   { label: "Ideias", to: "/ideas", icon: Lightbulb },
-  { label: "Dashboards", to: "/dashboards", icon: LayoutDashboard, shortcut: "D" },
 ];
 
 export const MANAGEMENT_NAV: NavItem[] = [

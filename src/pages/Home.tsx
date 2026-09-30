@@ -1,9 +1,12 @@
-import { AlertTriangle, CheckCircle2, FolderKanban, ListTodo, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle2, FolderKanban, LayoutDashboard, ListTodo, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useHomeData } from "@/features/home/useHomeData";
 import { isManagementRole } from "@/permissions/types";
 import { classifyTasksByDueDate } from "@/features/tasks/taskLogic";
-import { PRIORITY_BADGE_VARIANT } from "@/features/tasks/taskLabels";
+import { PRIORITY_BADGE_VARIANT, PRIORITY_LABELS, PRIORITY_ORDER, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
+import { PROJECT_STATUS_LABELS, PROJECT_STATUS_ORDER } from "@/features/projects/projectLabels";
+import { countByKey } from "@/features/dashboards/dashboardLogic";
+import { ChartWidget } from "@/features/dashboards/ChartWidget";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -50,19 +53,17 @@ function TaskGroup({ title, tasks }: { title: string; tasks: MyTask[] }) {
 
 function StatCard({ label, value, tone }: { label: string; value: number; tone?: "warning" | "destructive" }) {
   return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-xs font-medium text-muted-foreground">{label}</p>
-        <p
-          className={
-            "mt-1 text-2xl font-semibold " +
-            (tone === "destructive" ? "text-destructive" : tone === "warning" ? "text-warning" : "")
-          }
-        >
-          {value}
-        </p>
-      </CardContent>
-    </Card>
+    <div className="neu-sunken p-4">
+      <p className="text-xs font-medium text-muted-foreground">{label}</p>
+      <p
+        className={
+          "mt-1 font-mono text-2xl font-semibold " +
+          (tone === "destructive" ? "text-destructive" : tone === "warning" ? "text-warning" : "")
+        }
+      >
+        {value}
+      </p>
+    </div>
   );
 }
 
@@ -116,8 +117,11 @@ export function Home() {
       </div>
 
       {isManagementRole(primaryRole) && data?.scopeCounts && (
-        <div>
-          <h2 className="mb-2 text-sm font-semibold">Resumo da minha estrutura</h2>
+        <section className="neu-surface neu-fade-up space-y-5 p-5">
+          <h2 className="flex items-center gap-2 text-sm font-semibold">
+            <LayoutDashboard className="h-4 w-4 text-[var(--neu-lime-solid)]" /> Visão geral
+          </h2>
+
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
             <StatCard label="Tarefas abertas" value={data.scopeCounts.tasksOpen} />
             <StatCard label="Tarefas atrasadas" value={data.scopeCounts.tasksOverdue} tone="destructive" />
@@ -126,7 +130,25 @@ export function Home() {
             <StatCard label="Projetos em risco" value={data.scopeCounts.projectsAtRisk} tone="warning" />
             <StatCard label="Projetos bloqueados" value={data.scopeCounts.projectsBlocked} tone="destructive" />
           </div>
-        </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <ChartWidget
+              title="Tarefas por status"
+              testId="widget-tasks-by-status"
+              data={countByKey(data.tasks, (t) => t.status, STATUS_ORDER, (s) => STATUS_LABELS[s])}
+            />
+            <ChartWidget
+              title="Tarefas por prioridade"
+              testId="widget-tasks-by-priority"
+              data={countByKey(data.tasks, (t) => t.priority, PRIORITY_ORDER, (p) => PRIORITY_LABELS[p])}
+            />
+            <ChartWidget
+              title="Projetos por status"
+              testId="widget-projects-by-status"
+              data={countByKey(data.projects, (p) => p.status, PROJECT_STATUS_ORDER, (s) => PROJECT_STATUS_LABELS[s])}
+            />
+          </div>
+        </section>
       )}
 
       <Card>

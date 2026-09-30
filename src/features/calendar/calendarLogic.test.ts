@@ -4,6 +4,7 @@ import {
   buildMonthGrid,
   groupItemsByDate,
   shiftEventToDate,
+  summarizeItemsByKind,
   type CalendarItem,
 } from "@/features/calendar/calendarLogic";
 import type { Event } from "@/types/database";
@@ -127,6 +128,34 @@ describe("buildCalendarItems", () => {
       [makeEvent({ id: "e1", title: "Evento", starts_at: "2026-09-20T10:00:00.000Z" })],
     );
     expect(items.map((i) => i.id)).toEqual(["t1", "e1"]);
+  });
+});
+
+describe("summarizeItemsByKind", () => {
+  it("returns one summary entry per kind present, each with its count", () => {
+    const items: CalendarItem[] = [
+      { id: "1", date: "2026-09-20", title: "A", kind: "tarefa" },
+      { id: "2", date: "2026-09-20", title: "B", kind: "tarefa" },
+      { id: "3", date: "2026-09-20", title: "C", kind: "evento" },
+    ];
+    expect(summarizeItemsByKind(items)).toEqual([
+      { kind: "tarefa", count: 2 },
+      { kind: "evento", count: 1 },
+    ]);
+  });
+
+  it("orders summaries as tarefa, prazo, reuniao, evento regardless of input order", () => {
+    const items: CalendarItem[] = [
+      { id: "1", date: "2026-09-20", title: "A", kind: "evento" },
+      { id: "2", date: "2026-09-20", title: "B", kind: "prazo" },
+      { id: "3", date: "2026-09-20", title: "C", kind: "reuniao" },
+      { id: "4", date: "2026-09-20", title: "D", kind: "tarefa" },
+    ];
+    expect(summarizeItemsByKind(items).map((s) => s.kind)).toEqual(["tarefa", "prazo", "reuniao", "evento"]);
+  });
+
+  it("returns an empty array when there are no items", () => {
+    expect(summarizeItemsByKind([])).toEqual([]);
   });
 });
 

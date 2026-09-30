@@ -87,3 +87,21 @@ export function groupItemsByDate(items: CalendarItem[]): Record<string, Calendar
   }
   return groups;
 }
+
+export interface KindSummary {
+  kind: CalendarItemKind;
+  count: number;
+}
+
+const KIND_DISPLAY_ORDER: CalendarItemKind[] = ["tarefa", "prazo", "reuniao", "evento"];
+
+/** Groups a day's items into one summary per kind present, in a fixed
+ * display order, so a day cell can show a compact colored dot per kind
+ * (plus a count when more than one) instead of every item's full title. */
+export function summarizeItemsByKind(items: CalendarItem[]): KindSummary[] {
+  const counts = new Map<CalendarItemKind, number>();
+  for (const item of items) {
+    counts.set(item.kind, (counts.get(item.kind) ?? 0) + 1);
+  }
+  return KIND_DISPLAY_ORDER.filter((kind) => counts.has(kind)).map((kind) => ({ kind, count: counts.get(kind)! }));
+}

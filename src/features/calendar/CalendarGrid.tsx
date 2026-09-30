@@ -1,5 +1,11 @@
-import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { buildMonthGrid, groupItemsByDate, type CalendarItem, type CalendarItemKind } from "@/features/calendar/calendarLogic";
+import { buildMonthGrid, groupItemsByDate, summarizeItemsByKind, type CalendarItem, type CalendarItemKind } from "@/features/calendar/calendarLogic";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 interface CalendarGridProps {
@@ -17,6 +23,13 @@ const KIND_LABELS: Record<CalendarItemKind, string> = {
   prazo: "Prazo",
 };
 
+const KIND_LABELS_PLURAL: Record<CalendarItemKind, string> = {
+  tarefa: "tarefas",
+  evento: "eventos",
+  reuniao: "reuniões",
+  prazo: "prazos",
+};
+
 const KIND_DOT_CLASS: Record<CalendarItemKind, string> = {
   tarefa: "bg-primary",
   evento: "bg-success",
@@ -26,31 +39,8 @@ const KIND_DOT_CLASS: Record<CalendarItemKind, string> = {
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
-function CalendarItemChip({ item, onItemClick }: { item: CalendarItem; onItemClick: () => void }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: item.id });
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined}
-      className={cn("neu-surface-sm cursor-grab active:cursor-grabbing", isDragging && "z-10 opacity-70")}
-      {...attributes}
-      {...listeners}
-    >
-      <button
-        type="button"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={onItemClick}
-        className="w-full px-1.5 py-1 text-left text-[11px] leading-tight"
-      >
-        <div className="flex items-center gap-1">
-          <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", KIND_DOT_CLASS[item.kind])} />
-          <span className="text-muted-foreground">{KIND_LABELS[item.kind]}</span>
-        </div>
-        <p className="truncate font-medium">{item.title}</p>
-      </button>
-    </div>
-  );
+function kindSummaryLabel(kind: CalendarItemKind, count: number): string {
+  return count === 1 ? `1 ${KIND_LABELS[kind].toLowerCase()}` : `${count} ${KIND_LABELS_PLURAL[kind]}`;
 }
 
 function CalendarDayCell({
@@ -66,30 +56,51 @@ function CalendarDayCell({
   onItemDateChange: (id: string, newDate: string) => void;
   onItemClick: (item: CalendarItem) => void;
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: date });
   const dayNumber = Number(date.slice(8, 10));
+  const summary = summarizeItemsByKind(items);
+  const summaryLabel = summary.map((s) => kindSummaryLabel(s.kind, s.count)).join(", ");
 
   return (
     <div
-      ref={setNodeRef}
       data-testid={`calendar-day-${date}`}
-      className={cn(
-        "neu-divider flex min-h-24 flex-col gap-1 border p-1.5",
-        !inCurrentMonth && "text-muted-foreground",
-        isOver && "neu-focus",
-      )}
+      className={cn("neu-divider flex min-h-24 flex-col gap-1.5 border p-1.5", !inCurrentMonth && "text-muted-foreground")}
     >
       <span className="font-mono text-xs font-medium">{dayNumber}</span>
-      <div className="flex flex-col gap-1">
-        {items.map((item) => (
-          <CalendarItemChip key={item.id} item={item} onItemClick={() => onItemClick(item)} />
-        ))}
-      </div>
+
+      {summary.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              type="button"
+              aria-label={summaryLabel}
+              className="neu-sunken flex w-fit items-center gap-1 px-2 py-1 transition-transform hover:scale-105"
+            >
+              {summary.map((s) => (
+                <span key={s.kind} className="flex items-center gap-0.5">
+                  <span className={cn("h-2 w-2 shrink-0 rounded-full", KIND_DOT_CLASS[s.kind])} aria-hidden="true" />
+                  {s.count > 1 && <span className="font-mono text-[10px] text-muted-foreground">{s.count}</span>}
+                </span>
+              ))}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-64">
+            <DropdownMenuLabel>{summaryLabel}</DropdownMenuLabel>
+            {items.map((item) => (
+              <DropdownMenuItem key={item.id} onSelect={() => onItemClick(item)}>
+                <span className={cn("h-2 w-2 shrink-0 rounded-full", KIND_DOT_CLASS[item.kind])} aria-hidden="true" />
+                <span className="min-w-0 flex-1 truncate">{item.title}</span>
+                <span className="shrink-0 text-xs text-muted-foreground">{KIND_LABELS[item.kind]}</span>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+
       {items.length > 0 && (
         // One shared accessible date control per cell would be ambiguous
         // about which item it edits, so each item gets its own hidden-but-
-        // reachable date input — the tested, keyboard-usable equivalent of
-        // dragging a chip to another day.
+        // reachable date input — the keyboard-usable way to reschedule an
+        // item without opening the details menu.
         <div className="sr-only">
           {items.map((item) => (
             <input
@@ -111,32 +122,26 @@ export function CalendarGrid({ year, month, items, onItemDateChange, onItemClick
   const cells = buildMonthGrid(year, month);
   const grouped = groupItemsByDate(items);
 
-  function handleDragEnd(event: DragEndEvent) {
-    const itemId = event.active.id as string;
-    const newDate = event.over?.id as string | undefined;
-    const item = items.find((i) => i.id === itemId);
-    if (newDate && item && item.date !== newDate) onItemDateChange(itemId, newDate);
-  }
-
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <div className="neu-surface grid grid-cols-7 overflow-hidden p-1 text-sm">
-        {WEEKDAY_LABELS.map((label) => (
-          <div key={label} className="neu-divider border-b px-1.5 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
-            {label}
-          </div>
-        ))}
-        {cells.map((cell) => (
-          <CalendarDayCell
-            key={cell.date}
-            date={cell.date}
-            inCurrentMonth={cell.inCurrentMonth}
-            items={grouped[cell.date] ?? []}
-            onItemDateChange={onItemDateChange}
-            onItemClick={onItemClick}
-          />
-        ))}
-      </div>
-    </DndContext>
+    <div className="neu-surface grid grid-cols-7 overflow-hidden p-1 text-sm">
+      {WEEKDAY_LABELS.map((label) => (
+        <div
+          key={label}
+          className="neu-divider border-b px-1.5 py-1.5 text-center text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]"
+        >
+          {label}
+        </div>
+      ))}
+      {cells.map((cell) => (
+        <CalendarDayCell
+          key={cell.date}
+          date={cell.date}
+          inCurrentMonth={cell.inCurrentMonth}
+          items={grouped[cell.date] ?? []}
+          onItemDateChange={onItemDateChange}
+          onItemClick={onItemClick}
+        />
+      ))}
+    </div>
   );
 }

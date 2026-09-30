@@ -1,12 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { Calendar, FolderKanban, Home, ListTodo, Menu } from "lucide-react";
+import { FolderKanban, Home, LayoutGrid, ListTodo, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
   { label: "Home", to: "/home", icon: Home },
   { label: "Tarefas", to: "/tasks", icon: ListTodo },
+  { label: "Kanban", to: "/kanban", icon: LayoutGrid },
   { label: "Projetos", to: "/projects", icon: FolderKanban },
-  { label: "Calendário", to: "/calendar", icon: Calendar },
   { label: "Mais", to: "/settings", icon: Menu },
 ];
 

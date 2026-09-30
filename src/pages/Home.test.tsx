@@ -1,23 +1,30 @@
 import { render, screen, within } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { TaskListRow } from "@/repositories/taskRepository";
+import type { TaskListRow, MyTask } from "@/repositories/taskRepository";
 import type { ProjectListRow } from "@/repositories/projectRepository";
 
+const mockUseAuth = vi.fn();
+vi.mock("@/features/auth/useAuth", () => ({
+  useAuth: () => mockUseAuth(),
+}));
+
 vi.mock("@/repositories/taskRepository", () => ({
-  listTasks: vi.fn(),
+  listMyTasks: vi.fn(),
   getScopeCounts: vi.fn(),
+  listTasks: vi.fn(),
 }));
 
 vi.mock("@/repositories/projectRepository", () => ({
   listProjects: vi.fn(),
 }));
 
-import { Dashboards } from "@/pages/Dashboards";
-import { getScopeCounts, listTasks } from "@/repositories/taskRepository";
+import { Home } from "@/pages/Home";
+import { getScopeCounts, listMyTasks, listTasks } from "@/repositories/taskRepository";
 import { listProjects } from "@/repositories/projectRepository";
 
-const mockListTasks = vi.mocked(listTasks);
+const mockListMyTasks = vi.mocked(listMyTasks);
 const mockGetScopeCounts = vi.mocked(getScopeCounts);
+const mockListTasks = vi.mocked(listTasks);
 const mockListProjects = vi.mocked(listProjects);
 
 function makeTask(overrides: Partial<TaskListRow> & { id: string; title: string }): TaskListRow {
@@ -42,6 +49,10 @@ function makeTask(overrides: Partial<TaskListRow> & { id: string; title: string 
     assigneeIds: [],
     ...overrides,
   };
+}
+
+function makeMyTask(overrides: Partial<MyTask> & { id: string; title: string }): MyTask {
+  return makeTask(overrides) as MyTask;
 }
 
 function makeProject(overrides: Partial<ProjectListRow> & { id: string; name: string }): ProjectListRow {
@@ -70,26 +81,59 @@ function makeProject(overrides: Partial<ProjectListRow> & { id: string; name: st
   };
 }
 
+const SCOPE_COUNTS = {
+  tasksOpen: 12,
+  tasksOverdue: 3,
+  tasksCompleted: 40,
+  projectsActive: 5,
+  projectsAtRisk: 1,
+  projectsBlocked: 0,
+};
+
+function setManagementProfile() {
+  mockUseAuth.mockReturnValue({
+    profile: { id: "user-1", organization_id: "org-1", full_name: "Ana Gestora" },
+    primaryRole: "gerente",
+  });
+}
+
+function setContributorProfile() {
+  mockUseAuth.mockReturnValue({
+    profile: { id: "user-1", organization_id: "org-1", full_name: "Ana Colaboradora" },
+    primaryRole: "colaborador",
+  });
+}
+
 function renderPage() {
-  return render(<Dashboards />);
+  return render(<Home />);
 }
 
 beforeEach(() => {
-  mockListTasks.mockReset();
+  mockUseAuth.mockReset();
+  mockListMyTasks.mockReset();
   mockGetScopeCounts.mockReset();
+  mockListTasks.mockReset();
   mockListProjects.mockReset();
+  mockListMyTasks.mockResolvedValue([]);
 });
 
-describe("Dashboards page", () => {
-  it("shows the summary stat cards from getScopeCounts", async () => {
-    mockGetScopeCounts.mockResolvedValue({
-      tasksOpen: 12,
-      tasksOverdue: 3,
-      tasksCompleted: 40,
-      projectsActive: 5,
-      projectsAtRisk: 1,
-      projectsBlocked: 0,
-    });
+describe("Home page", () => {
+  it("greets the signed-in person by their first name", async () => {
+    setContributorProfile();
+    renderPage();
+    expect(await screen.findByText(/ana/i)).toBeInTheDocument();
+  });
+
+  it("does not show the visão geral panel for a non-management role", async () => {
+    setContributorProfile();
+    renderPage();
+    await screen.findByText(/tudo em dia/i);
+    expect(screen.queryByText(/visão geral/i)).not.toBeInTheDocument();
+  });
+
+  it("shows the summary stat cards from getScopeCounts for a management role", async () => {
+    setManagementProfile();
+    mockGetScopeCounts.mockResolvedValue(SCOPE_COUNTS);
     mockListTasks.mockResolvedValue([]);
     mockListProjects.mockResolvedValue([]);
 
@@ -101,14 +145,8 @@ describe("Dashboards page", () => {
   });
 
   it("shows the task status distribution with real counts", async () => {
-    mockGetScopeCounts.mockResolvedValue({
-      tasksOpen: 0,
-      tasksOverdue: 0,
-      tasksCompleted: 0,
-      projectsActive: 0,
-      projectsAtRisk: 0,
-      projectsBlocked: 0,
-    });
+    setManagementProfile();
+    mockGetScopeCounts.mockResolvedValue(SCOPE_COUNTS);
     mockListTasks.mockResolvedValue([
       makeTask({ id: "1", title: "A", status: "a_fazer" }),
       makeTask({ id: "2", title: "B", status: "a_fazer" }),
@@ -124,14 +162,8 @@ describe("Dashboards page", () => {
   });
 
   it("shows the project status distribution with real counts", async () => {
-    mockGetScopeCounts.mockResolvedValue({
-      tasksOpen: 0,
-      tasksOverdue: 0,
-      tasksCompleted: 0,
-      projectsActive: 0,
-      projectsAtRisk: 0,
-      projectsBlocked: 0,
-    });
+    setManagementProfile();
+    mockGetScopeCounts.mockResolvedValue(SCOPE_COUNTS);
     mockListTasks.mockResolvedValue([]);
     mockListProjects.mockResolvedValue([
       makeProject({ id: "p1", name: "Projeto A", status: "em_risco" }),
@@ -142,5 +174,14 @@ describe("Dashboards page", () => {
 
     const widget = await screen.findByTestId("widget-projects-by-status");
     expect(within(widget).getByText(/em risco: 2/i)).toBeInTheDocument();
+  });
+
+  it("lists the signed-in person's own tasks grouped by due date", async () => {
+    setContributorProfile();
+    mockListMyTasks.mockResolvedValue([makeMyTask({ id: "1", title: "Revisar contrato", due_date: null })]);
+
+    renderPage();
+
+    expect(await screen.findByText("Revisar contrato")).toBeInTheDocument();
   });
 });

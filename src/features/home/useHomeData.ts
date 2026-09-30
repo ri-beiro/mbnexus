@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/features/auth/useAuth";
-import { getScopeCounts, listMyTasks, type MyTask } from "@/repositories/taskRepository";
+import { getScopeCounts, listMyTasks, listTasks, type MyTask, type TaskListRow } from "@/repositories/taskRepository";
+import { listProjects, type ProjectListRow } from "@/repositories/projectRepository";
 import { isManagementRole } from "@/permissions/types";
 
 export interface HomeData {
   myTasks: MyTask[];
   scopeCounts: Awaited<ReturnType<typeof getScopeCounts>> | null;
+  tasks: TaskListRow[];
+  projects: ProjectListRow[];
 }
 
 export function useHomeData() {
@@ -22,11 +25,14 @@ export function useHomeData() {
       setLoading(true);
       setError(null);
       try {
-        const [myTasks, scopeCounts] = await Promise.all([
+        const managementView = isManagementRole(primaryRole);
+        const [myTasks, scopeCounts, tasks, projects] = await Promise.all([
           listMyTasks(profile!.id),
-          isManagementRole(primaryRole) ? getScopeCounts() : Promise.resolve(null),
+          managementView ? getScopeCounts() : Promise.resolve(null),
+          managementView ? listTasks() : Promise.resolve([]),
+          managementView ? listProjects() : Promise.resolve([]),
         ]);
-        if (!cancelled) setData({ myTasks, scopeCounts });
+        if (!cancelled) setData({ myTasks, scopeCounts, tasks, projects });
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Não foi possível carregar sua Home.");
       } finally {
