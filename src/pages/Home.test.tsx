@@ -121,7 +121,7 @@ describe("Home page", () => {
   it("greets the signed-in person by their first name", async () => {
     setContributorProfile();
     renderPage();
-    expect(await screen.findByText(/ana/i)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /ana/i })).toBeInTheDocument();
   });
 
   it("does not show the visão geral panel for a non-management role", async () => {

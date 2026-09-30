@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CountBadge } from "@/components/ui/count-badge";
 import type { TaskStatus } from "@/types/database";
 
 function StatusFilterBar({ active, onToggle }: { active: Set<TaskStatus>; onToggle: (status: TaskStatus) => void }) {
@@ -76,7 +77,9 @@ export function Tasks() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Tarefas</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            Tarefas <CountBadge value={visibleTasks.length} />
+          </h1>
           <p className="text-sm text-muted-foreground">Todas as tarefas que você pode ver, com filtros.</p>
         </div>
         <Button type="button" onClick={() => setCreateOpen(true)}>

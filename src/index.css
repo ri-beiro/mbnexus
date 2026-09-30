@@ -88,6 +88,7 @@
     --neu-text-secondary: #4b5d6b;
     --neu-text-tertiary: #66798a;
     --neu-text-label: #8598a8;
+    --neu-grid-dot: rgba(90, 110, 135, 0.18);
   }
 
   [data-theme="dark"] {
@@ -158,6 +159,7 @@
     --neu-text-secondary: #a8bac7;
     --neu-text-tertiary: #8da0b3;
     --neu-text-label: #6f8496;
+    --neu-grid-dot: rgba(120, 165, 200, 0.14);
   }
 
   @media (prefers-color-scheme: dark) {
@@ -217,6 +219,7 @@
       --neu-text-secondary: #a8bac7;
       --neu-text-tertiary: #8da0b3;
       --neu-text-label: #6f8496;
+      --neu-grid-dot: rgba(120, 165, 200, 0.14);
     }
   }
 
@@ -431,5 +434,64 @@
   .neu-select option {
     background: var(--neu-sunken-to);
     color: var(--foreground);
+  }
+
+  /* A faint technical dot-grid texture for hero/backdrop areas — pure CSS,
+     no image asset, kept subtle enough to read as texture, not noise. */
+  .neu-grid-bg {
+    position: relative;
+  }
+  .neu-grid-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: radial-gradient(circle, var(--neu-grid-dot) 1.4px, transparent 1.4px);
+    background-size: 26px 26px;
+    -webkit-mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black 40%, transparent 100%);
+    mask-image: radial-gradient(ellipse 90% 80% at 50% 0%, black 40%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  .neu-grid-bg > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Decorative sweeping "radar" accent — a self-contained visual flourish,
+     not tied to data, so it's opt-in on hero panels rather than global. */
+  .neu-radar {
+    position: relative;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 1;
+  }
+  .neu-radar::before,
+  .neu-radar::after {
+    content: "";
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    border: 1px solid var(--neu-divider);
+  }
+  .neu-radar::after {
+    inset: 28%;
+  }
+  .neu-radar-sweep {
+    position: absolute;
+    inset: 8%;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, var(--neu-glow) 0deg, transparent 55deg, transparent 360deg);
+    animation: neu-radar-spin 5s linear infinite;
+  }
+  .neu-radar-core {
+    position: relative;
+    z-index: 1;
+  }
+
+  @keyframes neu-radar-spin {
+    to {
+      transform: rotate(360deg);
+    }
   }
 }

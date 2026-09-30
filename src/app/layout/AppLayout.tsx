@@ -5,7 +5,7 @@ import { MobileNav } from "@/app/layout/MobileNav";
 
 export function AppLayout() {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-background">
+    <div className="neu-grid-bg flex h-screen w-full overflow-hidden bg-background">
       <Sidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar />

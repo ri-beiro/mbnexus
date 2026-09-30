@@ -26,7 +26,7 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
+    <div className="neu-grid-bg flex min-h-screen items-center justify-center bg-background px-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="items-center text-center">
           <div className="neu-surface-sm mb-2 flex h-12 w-12 items-center justify-center text-[var(--neu-lime-solid)]">

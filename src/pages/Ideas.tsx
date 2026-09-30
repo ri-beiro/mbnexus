@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
+import { CountBadge } from "@/components/ui/count-badge";
 import type { Idea } from "@/types/database";
 
 const APPROVED_INDEX = IDEA_STATUS_ORDER.indexOf("aprovada");
@@ -93,7 +94,9 @@ export function Ideas() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Central de Ideias</h1>
+        <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+          Central de Ideias <CountBadge value={ideas.length} />
+        </h1>
         <p className="text-sm text-muted-foreground">Registre, acompanhe e transforme ideias em projetos.</p>
       </div>
 

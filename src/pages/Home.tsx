@@ -21,6 +21,36 @@ function greeting(): string {
   return "Boa noite";
 }
 
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((p) => p[0]?.toUpperCase())
+    .join("");
+}
+
+function todayLabel(): string {
+  return new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).format(new Date());
+}
+
+function HeroStat({ label, value, tone }: { label: string; value: number; tone?: "warning" | "destructive" }) {
+  const animated = useCountUp(value);
+  return (
+    <div className="flex flex-col gap-1 px-4 py-2 first:pl-0 last:pr-0">
+      <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">{label}</span>
+      <span
+        className={
+          "font-mono text-xl font-bold tabular-nums " +
+          (tone === "destructive" ? "text-destructive" : tone === "warning" ? "text-warning" : "text-[var(--neu-lime-solid)]")
+        }
+      >
+        {String(animated).padStart(2, "0")}
+      </span>
+    </div>
+  );
+}
+
 function TaskRow({ task, index }: { task: MyTask; index: number }) {
   return (
     <li
@@ -78,8 +108,8 @@ export function Home() {
 
   if (loading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
+      <div className="space-y-6">
+        <Skeleton className="h-32 w-full" />
         <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <Skeleton key={i} className="h-20" />
@@ -106,20 +136,42 @@ export function Home() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
-          {greeting()}, {firstName}
-        </h1>
-        {groups.overdue.length > 0 ? (
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-destructive">
-            <AlertTriangle className="h-4 w-4" /> Você possui {groups.overdue.length} tarefa(s) atrasada(s).
-          </p>
-        ) : (
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-success">
-            <CheckCircle2 className="h-4 w-4" /> Tudo em dia.
-          </p>
-        )}
-      </div>
+      <section className="neu-surface neu-grid-bg neu-fade-up overflow-hidden p-6 md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-start gap-4">
+            <div className="neu-radar h-16 w-16 shrink-0">
+              <div className="neu-radar-sweep" />
+              <div className="neu-radar-core neu-surface-sm flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-[var(--neu-lime-solid)]">
+                {profile ? initials(profile.full_name) : null}
+              </div>
+            </div>
+            <div>
+              <span className="neu-sunken inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[var(--neu-lime-solid)]" /> {todayLabel()}
+              </span>
+              <h1 className="mt-2 text-2xl font-semibold tracking-tight">
+                {greeting()}, {firstName}
+              </h1>
+              {groups.overdue.length > 0 ? (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-destructive">
+                  <AlertTriangle className="h-4 w-4" /> Você possui {groups.overdue.length} tarefa(s) atrasada(s).
+                </p>
+              ) : (
+                <p className="mt-1 flex items-center gap-1.5 text-sm text-success">
+                  <CheckCircle2 className="h-4 w-4" /> Tudo em dia.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="neu-sunken flex divide-x divide-[var(--neu-divider)] px-2 py-1">
+            <HeroStat label="Atrasadas" value={groups.overdue.length} tone="destructive" />
+            <HeroStat label="Hoje" value={groups.dueToday.length} />
+            <HeroStat label="Semana" value={groups.thisWeek.length} />
+            <HeroStat label="Concluídas" value={groups.completed.length} />
+          </div>
+        </div>
+      </section>
 
       {isManagementRole(primaryRole) && data?.scopeCounts && (
         <section className="neu-surface neu-fade-up space-y-5 p-5">

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CountBadge } from "@/components/ui/count-badge";
 import type { TaskStatus } from "@/types/database";
 
 // Mesma entidade e o mesmo repositório da view de Lista (src/pages/Tasks.tsx)
@@ -43,7 +44,9 @@ export function Kanban() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Kanban</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-semibold tracking-tight">
+            Kanban <CountBadge value={tasks.length} />
+          </h1>
           <p className="text-sm text-muted-foreground">Arraste um cartão entre colunas para mudar o status.</p>
         </div>
         <Button type="button" onClick={() => setCreateOpen(true)}>
