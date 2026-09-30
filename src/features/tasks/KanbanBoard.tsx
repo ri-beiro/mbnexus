@@ -15,10 +15,12 @@ interface KanbanBoardProps {
 
 function KanbanCard({
   task,
+  index,
   onStatusChange,
   onCardClick,
 }: {
   task: TaskListRow;
+  index: number;
   onStatusChange: (status: TaskStatus) => void;
   onCardClick: () => void;
 }) {
@@ -28,9 +30,12 @@ function KanbanCard({
     <div
       ref={setNodeRef}
       data-kanban-card
-      style={transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined}
+      style={{
+        ...(transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined),
+        animationDelay: `${Math.min(index, 8) * 45}ms`,
+      }}
       className={cn(
-        "neu-surface-sm neu-fade-up cursor-grab space-y-1.5 p-3 text-sm active:cursor-grabbing",
+        "neu-surface-sm neu-surface-hover neu-fade-up cursor-grab space-y-1.5 p-3 text-sm active:cursor-grabbing",
         isDragging && "z-10 opacity-70",
       )}
       {...attributes}
@@ -103,10 +108,11 @@ function KanbanColumn({
             Sem tarefas nesta coluna.
           </p>
         )}
-        {tasks.map((task) => (
+        {tasks.map((task, index) => (
           <KanbanCard
             key={task.id}
             task={task}
+            index={index}
             onStatusChange={(s) => onStatusChange(task.id, s)}
             onCardClick={() => onCardClick(task.id)}
           />

@@ -58,8 +58,9 @@ export function NotificationCenter() {
         <Button variant="ghost" size="icon" className="relative" aria-label="Notificações">
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
-              {unreadCount > 9 ? "9+" : unreadCount}
+            <span className="neu-pop-in absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground shadow-[0_0_0_2px_var(--neu-surface-from)]">
+              <span className="absolute inset-0 animate-ping rounded-full bg-destructive opacity-60" aria-hidden="true" />
+              <span className="relative">{unreadCount > 9 ? "9+" : unreadCount}</span>
             </span>
           )}
         </Button>

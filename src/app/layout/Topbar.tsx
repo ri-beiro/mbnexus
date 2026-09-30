@@ -77,7 +77,7 @@ export function Topbar() {
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="flex items-center gap-2 rounded-full">
+          <button className="neu-surface-sm neu-surface-hover flex items-center gap-2 rounded-full p-0.5">
             <Avatar>
               <AvatarFallback>{profile ? initials(profile.full_name) : <User className="h-4 w-4" />}</AvatarFallback>
             </Avatar>

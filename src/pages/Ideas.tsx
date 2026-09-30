@@ -116,11 +116,16 @@ export function Ideas() {
         <EmptyState icon={Lightbulb} title="Nenhuma ideia registrada ainda" description="Registre a primeira ideia acima." />
       ) : (
         <ul className="neu-surface flex flex-col gap-2 p-4">
-          {ideas.map((idea) => {
+          {ideas.map((idea, index) => {
             const next = nextIdeaStatus(idea.status);
             const canConvert = idea.converted_project_id === null && IDEA_STATUS_ORDER.indexOf(idea.status) >= APPROVED_INDEX;
             return (
-              <li key={idea.id} data-testid={`idea-row-${idea.id}`} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
+              <li
+                key={idea.id}
+                data-testid={`idea-row-${idea.id}`}
+                className="neu-sunken neu-fade-up flex flex-wrap items-center gap-3 px-3.5 py-2.5"
+                style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
+              >
                 <div className="min-w-40 flex-1">
                   <p className="text-sm font-medium">{idea.title}</p>
                   {idea.problem && <p className="truncate text-xs text-muted-foreground">{idea.problem}</p>}

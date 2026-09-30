@@ -140,8 +140,8 @@ describe("Home page", () => {
     renderPage();
 
     expect(await screen.findByText("12")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByText("40")).toBeInTheDocument();
+    expect(await screen.findByText("3")).toBeInTheDocument();
+    expect(await screen.findByText("40")).toBeInTheDocument();
   });
 
   it("shows the task status distribution with real counts", async () => {

@@ -7,6 +7,7 @@ import { PRIORITY_BADGE_VARIANT, PRIORITY_LABELS, PRIORITY_ORDER, STATUS_LABELS,
 import { PROJECT_STATUS_LABELS, PROJECT_STATUS_ORDER } from "@/features/projects/projectLabels";
 import { countByKey } from "@/features/dashboards/dashboardLogic";
 import { ChartWidget } from "@/features/dashboards/ChartWidget";
+import { useCountUp } from "@/lib/useCountUp";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,9 +21,12 @@ function greeting(): string {
   return "Boa noite";
 }
 
-function TaskRow({ task }: { task: MyTask }) {
+function TaskRow({ task, index }: { task: MyTask; index: number }) {
   return (
-    <li className="neu-sunken flex items-center justify-between gap-3 px-3.5 py-2.5">
+    <li
+      className="neu-sunken neu-fade-up flex items-center justify-between gap-3 px-3.5 py-2.5"
+      style={{ animationDelay: `${Math.min(index, 10) * 35}ms` }}
+    >
       <div className="min-w-0">
         <p className="truncate text-sm font-medium">{task.title}</p>
         <p className="truncate text-xs text-muted-foreground">{task.project_name ?? "Sem projeto"}</p>
@@ -43,8 +47,8 @@ function TaskGroup({ title, tasks }: { title: string; tasks: MyTask[] }) {
         {title} ({tasks.length})
       </h3>
       <ul className="space-y-1.5">
-        {tasks.map((t) => (
-          <TaskRow key={t.id} task={t} />
+        {tasks.map((t, i) => (
+          <TaskRow key={t.id} task={t} index={i} />
         ))}
       </ul>
     </div>
@@ -52,16 +56,17 @@ function TaskGroup({ title, tasks }: { title: string; tasks: MyTask[] }) {
 }
 
 function StatCard({ label, value, tone }: { label: string; value: number; tone?: "warning" | "destructive" }) {
+  const animated = useCountUp(value);
   return (
-    <div className="neu-sunken p-4">
+    <div className="neu-sunken p-4 transition-transform duration-200 hover:scale-[1.02]">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
       <p
         className={
-          "mt-1 font-mono text-2xl font-semibold " +
+          "mt-1 font-mono text-2xl font-semibold tabular-nums " +
           (tone === "destructive" ? "text-destructive" : tone === "warning" ? "text-warning" : "")
         }
       >
-        {value}
+        {animated}
       </p>
     </div>
   );

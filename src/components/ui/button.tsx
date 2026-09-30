@@ -4,16 +4,17 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:neu-focus disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:neu-focus disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0 [&_svg]:transition-transform [&_svg]:duration-200",
   {
     variants: {
       variant: {
         default: "neu-btn-primary font-semibold",
         destructive:
-          "neu-surface-sm text-[var(--neu-error-text)] hover:shadow-none hover:brightness-110 active:neu-pressed",
+          "neu-surface-sm text-[var(--neu-error-text)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-none hover:brightness-110 active:scale-95 active:neu-pressed",
         outline: "neu-btn-secondary",
         secondary: "neu-btn-secondary",
-        ghost: "text-muted-foreground hover:bg-[rgba(190,249,27,0.09)] hover:text-[var(--neu-lime-solid)] rounded-2xl",
+        ghost:
+          "text-muted-foreground hover:scale-105 hover:bg-[rgba(190,249,27,0.09)] hover:text-[var(--neu-lime-solid)] active:scale-90 rounded-2xl",
         link: "text-[var(--neu-lime-solid)] underline-offset-4 hover:underline rounded-none",
       },
       size: {

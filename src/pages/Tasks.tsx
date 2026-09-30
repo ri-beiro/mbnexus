@@ -121,10 +121,15 @@ export function Tasks() {
         />
       ) : (
         <ul className="neu-surface flex flex-col gap-2 p-4">
-          {visibleTasks.map((task) => {
+          {visibleTasks.map((task, index) => {
             const isExpanded = expandedId === task.id;
             return (
-              <li key={task.id} data-task-row className="neu-sunken px-3.5 py-2.5">
+              <li
+                key={task.id}
+                data-task-row
+                className="neu-sunken neu-fade-up px-3.5 py-2.5"
+                style={{ animationDelay: `${Math.min(index, 12) * 30}ms` }}
+              >
                 <div className="flex flex-wrap items-center gap-3">
                   <button
                     type="button"
