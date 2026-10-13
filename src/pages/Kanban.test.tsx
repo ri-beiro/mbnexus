@@ -6,7 +6,7 @@ import type { TaskListRow } from "@/repositories/taskRepository";
 
 vi.mock("@/features/auth/useAuth", () => ({
   useAuth: () => ({
-    profile: { id: "user-1", organization_id: "org-1", full_name: "Ana Teste" },
+    profile: { id: "user-1", organization_id: "org-1", full_name: "Ana Teste", primary_team_id: "team-1" },
     hasPermission: () => true,
   }),
 }));
@@ -28,6 +28,13 @@ vi.mock("@/repositories/profileRepository", () => ({
 
 vi.mock("@/repositories/projectRepository", () => ({
   listProjects: vi.fn().mockResolvedValue([]),
+}));
+
+vi.mock("@/repositories/hierarchyRepository", () => ({
+  listTeamMembers: vi.fn().mockResolvedValue([
+    { id: "tm-1", team_id: "team-1", profile_id: "user-1", is_primary: true, joined_at: "2026-01-01" },
+    { id: "tm-2", team_id: "team-1", profile_id: "user-2", is_primary: true, joined_at: "2026-01-01" },
+  ]),
 }));
 
 import { Kanban } from "@/pages/Kanban";
@@ -108,5 +115,36 @@ describe("Kanban page", () => {
 
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Corrigir bug")).toBeInTheDocument();
+  });
+
+  it("filters to only the signed-in user's tasks when Minhas tarefas is selected", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([
+      makeRow({ id: "1", title: "Minha tarefa", status: "a_fazer", assigneeIds: ["user-1"] }),
+      makeRow({ id: "2", title: "Tarefa de outra pessoa", status: "a_fazer", assigneeIds: ["user-3"] }),
+    ]);
+
+    renderPage();
+    await screen.findByText("Minha tarefa");
+
+    await user.click(screen.getByRole("button", { name: "Minhas tarefas" }));
+
+    expect(screen.getByText("Minha tarefa")).toBeInTheDocument();
+    expect(screen.queryByText("Tarefa de outra pessoa")).not.toBeInTheDocument();
+  });
+
+  it("filters to the signed-in user's team when Equipe is selected", async () => {
+    const user = userEvent.setup();
+    mockListTasks.mockResolvedValue([
+      makeRow({ id: "1", title: "Tarefa da equipe", status: "a_fazer", assigneeIds: ["user-2"] }),
+      makeRow({ id: "2", title: "Tarefa de fora", status: "a_fazer", assigneeIds: ["user-3"] }),
+    ]);
+
+    renderPage();
+    const teamButton = await screen.findByRole("button", { name: "Equipe" });
+    await user.click(teamButton);
+
+    expect(await screen.findByText("Tarefa da equipe")).toBeInTheDocument();
+    expect(screen.queryByText("Tarefa de fora")).not.toBeInTheDocument();
   });
 });

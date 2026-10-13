@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LayoutGrid, Plus, Search, X } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useTasksData } from "@/features/tasks/useTasksData";
@@ -8,6 +8,7 @@ import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
 import { filterTasks } from "@/features/tasks/taskLogic";
 import { PRIORITY_LABELS, PRIORITY_ORDER } from "@/features/tasks/taskLabels";
 import { updateTask } from "@/repositories/taskRepository";
+import { listTeamMembers } from "@/repositories/hierarchyRepository";
 import { useToast } from "@/components/ui/toast-provider";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +17,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { CountBadge } from "@/components/ui/count-badge";
 import { cn } from "@/lib/utils";
 import type { TaskPriority, TaskStatus } from "@/types/database";
+
+type ScopeFilter = "all" | "mine" | "team";
 
 // Mesma entidade e o mesmo repositório da view de Lista (src/pages/Tasks.tsx)
 // — o board não duplica dados, só oferece outra visualização deles
@@ -34,7 +37,32 @@ export function Kanban() {
   const [projectId, setProjectId] = useState("");
   const [priority, setPriority] = useState<TaskPriority | "">("");
   const [overdueOnly, setOverdueOnly] = useState(false);
-  const [mineOnly, setMineOnly] = useState(false);
+  const [scope, setScope] = useState<ScopeFilter>("all");
+
+  // Membros do próprio time (RLS em team_members já restringe o que volta a
+  // quem o usuário pode ver — nenhum acesso novo é concedido aqui, só um
+  // recorte sobre tarefas que o board já carregou via RLS em `tasks`).
+  const [teamMemberIds, setTeamMemberIds] = useState<string[] | null>(null);
+
+  useEffect(() => {
+    if (!profile?.primary_team_id) return;
+    let cancelled = false;
+    listTeamMembers()
+      .then((members) => {
+        if (cancelled) return;
+        setTeamMemberIds(
+          members.filter((m) => m.team_id === profile.primary_team_id).map((m) => m.profile_id),
+        );
+      })
+      .catch(() => {
+        if (!cancelled) setTeamMemberIds(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profile?.primary_team_id]);
+
+  const hasTeamScope = Boolean(profile?.primary_team_id) && (teamMemberIds?.length ?? 0) > 0;
 
   const today = new Date().toISOString().slice(0, 10);
 
@@ -46,7 +74,7 @@ export function Kanban() {
     return [...seen.entries()];
   }, [tasks]);
 
-  const hasActiveFilters = Boolean(search || assigneeId || projectId || priority || overdueOnly || mineOnly);
+  const hasActiveFilters = Boolean(search || assigneeId || projectId || priority || overdueOnly || scope !== "all");
 
   const filteredTasks = useMemo(() => {
     let result = filterTasks(tasks, {
@@ -55,10 +83,14 @@ export function Kanban() {
       projectId: projectId || undefined,
       priorities: priority ? [priority] : undefined,
     });
-    if (mineOnly && profile) result = result.filter((t) => t.assigneeIds.includes(profile.id));
+    if (scope === "mine" && profile) {
+      result = result.filter((t) => t.assigneeIds.includes(profile.id));
+    } else if (scope === "team" && teamMemberIds) {
+      result = result.filter((t) => t.assigneeIds.some((id) => teamMemberIds.includes(id)));
+    }
     if (overdueOnly) result = result.filter((t) => t.status !== "concluido" && t.due_date !== null && t.due_date < today);
     return result;
-  }, [tasks, search, assigneeId, projectId, priority, mineOnly, overdueOnly, profile, today]);
+  }, [tasks, search, assigneeId, projectId, priority, scope, teamMemberIds, overdueOnly, profile, today]);
 
   function clearFilters() {
     setSearch("");
@@ -66,7 +98,7 @@ export function Kanban() {
     setProjectId("");
     setPriority("");
     setOverdueOnly(false);
-    setMineOnly(false);
+    setScope("all");
   }
 
   function handleAddCard(status: TaskStatus) {
@@ -176,16 +208,40 @@ export function Kanban() {
           ))}
         </select>
 
-        <button
-          type="button"
-          onClick={() => setMineOnly((v) => !v)}
-          className={cn(
-            "h-9 rounded-full px-3 text-xs font-medium transition-colors",
-            mineOnly ? "bg-[rgba(190,249,27,0.18)] text-[var(--neu-lime-solid)]" : "text-muted-foreground hover:text-foreground",
+        <div className="neu-surface-sm flex items-center gap-0.5 rounded-full p-0.5" role="group" aria-label="Escopo de visualização">
+          <button
+            type="button"
+            onClick={() => setScope("all")}
+            className={cn(
+              "h-8 rounded-full px-3 text-xs font-medium transition-colors",
+              scope === "all" ? "bg-[rgba(190,249,27,0.18)] text-[var(--neu-lime-solid)]" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Todas
+          </button>
+          <button
+            type="button"
+            onClick={() => setScope("mine")}
+            className={cn(
+              "h-8 rounded-full px-3 text-xs font-medium transition-colors",
+              scope === "mine" ? "bg-[rgba(190,249,27,0.18)] text-[var(--neu-lime-solid)]" : "text-muted-foreground hover:text-foreground",
+            )}
+          >
+            Minhas tarefas
+          </button>
+          {hasTeamScope && (
+            <button
+              type="button"
+              onClick={() => setScope("team")}
+              className={cn(
+                "h-8 rounded-full px-3 text-xs font-medium transition-colors",
+                scope === "team" ? "bg-[rgba(190,249,27,0.18)] text-[var(--neu-lime-solid)]" : "text-muted-foreground hover:text-foreground",
+              )}
+            >
+              Equipe
+            </button>
           )}
-        >
-          Minhas tarefas
-        </button>
+        </div>
 
         <button
           type="button"
