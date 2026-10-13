@@ -11,6 +11,7 @@ import {
 import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { computeBoardPosition, groupTasksByStatus, sortTasksByBoardPosition } from "@/features/tasks/kanbanLogic";
+import { formatDueDateLabel } from "@/features/tasks/taskLogic";
 import { PRIORITY_ACCENT_COLOR, PRIORITY_LABELS, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -60,6 +61,10 @@ function CardAssignees({ profiles, assigneeIds }: { profiles: Profile[]; assigne
  * marker, then a bottom row with due date on the left and avatars on the
  * right. */
 function CardFace({ task, profiles }: { task: TaskListRow; profiles: Profile[] }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const dueLabel = formatDueDateLabel(task.due_date, task.status, today);
+  const isOverdueOrToday = task.due_date !== null && task.status !== "concluido" && task.due_date <= today;
+
   return (
     <div className="space-y-2">
       <span
@@ -75,8 +80,15 @@ function CardFace({ task, profiles }: { task: TaskListRow; profiles: Profile[] }
 
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          {task.due_date && (
-            <span className="neu-sunken rounded-full px-2 py-0.5 font-mono text-[10px] text-muted-foreground">{task.due_date}</span>
+          {dueLabel && (
+            <span
+              className={cn(
+                "neu-sunken rounded-full px-2 py-0.5 text-[10px] font-medium",
+                isOverdueOrToday ? "text-[var(--neu-error-text)]" : "text-muted-foreground",
+              )}
+            >
+              {dueLabel}
+            </span>
           )}
           {task.description && (
             <span title="Tem descrição" className="text-muted-foreground">
