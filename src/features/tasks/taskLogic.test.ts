@@ -3,7 +3,10 @@ import {
   classifyTasksByDueDate,
   computeParentProgressFromSubtasks,
   filterTasks,
+  formatDueDateLabel,
   sortTasksByDueDate,
+  sortTasksByPriorityAndDueDate,
+  splitByDueDate,
   type FilterableTask,
 } from "@/features/tasks/taskLogic";
 import type { Task, TaskStatus } from "@/types/database";
@@ -165,5 +168,80 @@ describe("filterTasks", () => {
   it("combines multiple filters with AND semantics", () => {
     const result = filterTasks(tasks, { projectId: "p1", assigneeId: "u2" });
     expect(result.map((t) => t.id)).toEqual(["3"]);
+  });
+
+  it("also matches the search term against the description", () => {
+    const withDescription: FilterableTask[] = [
+      { ...makeTask({ id: "4", title: "Sem relação", description: "fechar o relatório financeiro" }), assigneeIds: [] },
+    ];
+    const result = filterTasks(withDescription, { search: "financeiro" });
+    expect(result.map((t) => t.id)).toEqual(["4"]);
+  });
+});
+
+describe("sortTasksByPriorityAndDueDate", () => {
+  it("sorts urgent/critical priorities before low/normal ones", () => {
+    const low = makeTask({ id: "low", priority: "baixa", due_date: "2026-09-16" });
+    const critical = makeTask({ id: "critical", priority: "critica", due_date: "2026-09-20" });
+    expect(sortTasksByPriorityAndDueDate([low, critical]).map((t) => t.id)).toEqual(["critical", "low"]);
+  });
+
+  it("breaks ties within the same priority by soonest due date", () => {
+    const later = makeTask({ id: "later", priority: "alta", due_date: "2026-09-20" });
+    const sooner = makeTask({ id: "sooner", priority: "alta", due_date: "2026-09-16" });
+    expect(sortTasksByPriorityAndDueDate([later, sooner]).map((t) => t.id)).toEqual(["sooner", "later"]);
+  });
+
+  it("puts tasks with no due date after dated tasks of the same priority", () => {
+    const noDate = makeTask({ id: "no-date", priority: "normal", due_date: null });
+    const dated = makeTask({ id: "dated", priority: "normal", due_date: "2026-09-16" });
+    expect(sortTasksByPriorityAndDueDate([noDate, dated]).map((t) => t.id)).toEqual(["dated", "no-date"]);
+  });
+
+  it("does not mutate the input array", () => {
+    const input = [makeTask({ id: "a", priority: "baixa" }), makeTask({ id: "b", priority: "critica" })];
+    const original = [...input];
+    sortTasksByPriorityAndDueDate(input);
+    expect(input).toEqual(original);
+  });
+});
+
+describe("splitByDueDate", () => {
+  it("separates tasks with a due date from tasks without one, preserving order", () => {
+    const dated = makeTask({ id: "dated", due_date: "2026-10-01" });
+    const undated = makeTask({ id: "undated", due_date: null });
+    const result = splitByDueDate([dated, undated]);
+    expect(result.withDate).toEqual([dated]);
+    expect(result.withoutDate).toEqual([undated]);
+  });
+});
+
+describe("formatDueDateLabel", () => {
+  it("returns null when there is no due date", () => {
+    expect(formatDueDateLabel(null, "a_fazer", REFERENCE_DATE)).toBeNull();
+  });
+
+  it("returns null for a completed task, even if its due date is in the past", () => {
+    expect(formatDueDateLabel("2026-01-01", "concluido", REFERENCE_DATE)).toBeNull();
+  });
+
+  it("reports how many days overdue a task is", () => {
+    expect(formatDueDateLabel("2026-09-13", "a_fazer", REFERENCE_DATE)).toBe("Atrasada há 2 dias");
+  });
+
+  it("uses singular for exactly one day overdue", () => {
+    expect(formatDueDateLabel("2026-09-14", "a_fazer", REFERENCE_DATE)).toBe("Atrasada há 1 dia");
+  });
+
+  it("reports a task due today", () => {
+    expect(formatDueDateLabel(REFERENCE_DATE, "a_fazer", REFERENCE_DATE)).toBe("Vence hoje");
+  });
+
+  it("reports a task due tomorrow", () => {
+    expect(formatDueDateLabel("2026-09-16", "a_fazer", REFERENCE_DATE)).toBe("Vence amanhã");
+  });
+
+  it("reports a task due further in the future", () => {
+    expect(formatDueDateLabel("2026-09-20", "a_fazer", REFERENCE_DATE)).toBe("Vence em 5 dias");
   });
 });
