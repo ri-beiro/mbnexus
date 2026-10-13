@@ -42,6 +42,9 @@ export interface Profile {
   job_title: string | null;
   avatar_url: string | null;
   cover_url: string | null;
+  teams_url: string | null;
+  whatsapp_number: string | null;
+  birthday: string | null;
   is_active: boolean;
   primary_team_id: string | null;
   created_at: string;

@@ -59,3 +59,28 @@ export function uploadAvatar(profileId: string, file: File): Promise<string> {
 export function uploadCoverPhoto(profileId: string, file: File): Promise<string> {
   return uploadProfileMedia(profileId, file, "cover", "cover_url");
 }
+
+export interface ProfileDetailsUpdate {
+  fullName?: string;
+  teamsUrl?: string | null;
+  whatsappNumber?: string | null;
+  birthday?: string | null;
+}
+
+/** Only the keys actually present in `updates` are sent, so a field left
+ * out of the call keeps its current value instead of being cleared. */
+export async function updateProfileDetails(profileId: string, updates: ProfileDetailsUpdate): Promise<void> {
+  const payload: Record<string, unknown> = {};
+  if ("fullName" in updates) payload.full_name = updates.fullName;
+  if ("teamsUrl" in updates) payload.teams_url = updates.teamsUrl;
+  if ("whatsappNumber" in updates) payload.whatsapp_number = updates.whatsappNumber;
+  if ("birthday" in updates) payload.birthday = updates.birthday;
+
+  const { error } = await supabase.from("profiles").update(payload).eq("id", profileId);
+  if (error) throw error;
+}
+
+export async function setCoverPreset(profileId: string, presetId: string): Promise<void> {
+  const { error } = await supabase.from("profiles").update({ cover_url: `preset:${presetId}` }).eq("id", profileId);
+  if (error) throw error;
+}

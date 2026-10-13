@@ -17,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast-provider";
+import { ProfileHoverCard } from "@/features/profile/ProfileHoverCard";
 import type { Profile, Task, TaskComment } from "@/types/database";
 
 interface TaskDetailPanelProps {
@@ -36,6 +37,10 @@ function profileName(profiles: Profile[], id: string): string {
 
 function profileAvatarUrl(profiles: Profile[], id: string): string | null {
   return profiles.find((p) => p.id === id)?.avatar_url ?? null;
+}
+
+function findProfile(profiles: Profile[], id: string): Profile | undefined {
+  return profiles.find((p) => p.id === id);
 }
 
 export function TaskDetailPanel({
@@ -206,12 +211,18 @@ export function TaskDetailPanel({
           {assignees.length === 0 && <p className="text-xs text-muted-foreground">Nenhum responsável atribuído.</p>}
           {assignees.map((id) => (
             <div key={id} className="neu-divider flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
-              <Avatar className="h-5 w-5">
-                {profileAvatarUrl(profiles, id) && (
-                  <AvatarImage src={profileAvatarUrl(profiles, id)!} alt={profileName(profiles, id)} />
-                )}
-                <AvatarFallback className="text-[10px]">{profileName(profiles, id).slice(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
+              {(() => {
+                const avatarEl = (
+                  <Avatar className="h-5 w-5 cursor-default">
+                    {profileAvatarUrl(profiles, id) && (
+                      <AvatarImage src={profileAvatarUrl(profiles, id)!} alt={profileName(profiles, id)} />
+                    )}
+                    <AvatarFallback className="text-[10px]">{profileName(profiles, id).slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                );
+                const assignee = findProfile(profiles, id);
+                return assignee ? <ProfileHoverCard profile={assignee}>{avatarEl}</ProfileHoverCard> : avatarEl;
+              })()}
               {profileName(profiles, id)}
               <button
                 type="button"

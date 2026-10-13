@@ -407,6 +407,24 @@
     }
   }
 
+  .balloon-rise {
+    animation: balloon-rise linear infinite;
+  }
+
+  @keyframes balloon-rise {
+    0% {
+      transform: translateY(0) translateX(0) rotate(-3deg);
+      opacity: 0.9;
+    }
+    50% {
+      transform: translateY(-60vh) translateX(18px) rotate(3deg);
+    }
+    100% {
+      transform: translateY(-130vh) translateX(-10px) rotate(-3deg);
+      opacity: 0;
+    }
+  }
+
   @keyframes neu-shimmer-sweep {
     from {
       transform: translateX(-100%);

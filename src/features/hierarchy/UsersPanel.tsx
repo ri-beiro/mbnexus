@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileHoverCard } from "@/features/profile/ProfileHoverCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast-provider";
 import { RequirePermission } from "@/permissions/RequirePermission";
@@ -42,10 +43,12 @@ export function UsersPanel() {
     <div className="neu-surface flex flex-col gap-2 p-4">
       {data.profiles.map((p) => (
         <div key={p.id} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
-          <Avatar>
-            {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name} />}
-            <AvatarFallback>{p.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
-          </Avatar>
+          <ProfileHoverCard profile={p}>
+            <Avatar className="cursor-default">
+              {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name} />}
+              <AvatarFallback>{p.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
+          </ProfileHoverCard>
           <div className="min-w-40 flex-1">
             <p className="text-sm font-medium">{p.full_name}</p>
             <p className="text-xs text-muted-foreground">{p.job_title ?? p.email}</p>
