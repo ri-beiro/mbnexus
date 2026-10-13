@@ -41,6 +41,7 @@ export interface Profile {
   email: string;
   job_title: string | null;
   avatar_url: string | null;
+  cover_url: string | null;
   is_active: boolean;
   primary_team_id: string | null;
   created_at: string;

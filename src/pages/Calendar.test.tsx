@@ -1,6 +1,6 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import type { TaskListRow } from "@/repositories/taskRepository";
 import type { Event } from "@/types/database";
@@ -87,12 +87,21 @@ function renderPage() {
 }
 
 beforeEach(() => {
+  // The page defaults its visible month to "today"; pin the clock so the
+  // fixture dates (2026-09-xx) always fall in the rendered month regardless
+  // of when the suite actually runs.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-09-15T12:00:00Z"));
   mockListTasks.mockReset();
   mockUpdateTask.mockReset();
   mockListEvents.mockReset();
   mockCreateEvent.mockReset();
   mockUpdateEvent.mockReset();
   mockCreateTeamsMeeting.mockReset();
+});
+
+afterEach(() => {
+  vi.useRealTimers();
 });
 
 describe("Calendar page", () => {

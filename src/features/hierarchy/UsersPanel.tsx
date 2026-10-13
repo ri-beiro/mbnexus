@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/toast-provider";
 import { RequirePermission } from "@/permissions/RequirePermission";
@@ -43,6 +43,7 @@ export function UsersPanel() {
       {data.profiles.map((p) => (
         <div key={p.id} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
           <Avatar>
+            {p.avatar_url && <AvatarImage src={p.avatar_url} alt={p.full_name} />}
             <AvatarFallback>{p.full_name.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="min-w-40 flex-1">

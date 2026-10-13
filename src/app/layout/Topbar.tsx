@@ -3,7 +3,7 @@ import { Calendar, HelpCircle, LogOut, Plus, Search, Settings, User } from "luci
 import { useAuth } from "@/features/auth/useAuth";
 import { ROLE_LABELS } from "@/permissions/types";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -79,6 +79,7 @@ export function Topbar() {
         <DropdownMenuTrigger asChild>
           <button className="neu-surface-sm neu-surface-hover flex items-center gap-2 rounded-full p-0.5">
             <Avatar>
+              {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name} />}
               <AvatarFallback>{profile ? initials(profile.full_name) : <User className="h-4 w-4" />}</AvatarFallback>
             </Avatar>
           </button>

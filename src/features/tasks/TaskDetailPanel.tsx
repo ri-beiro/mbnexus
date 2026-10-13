@@ -13,7 +13,7 @@ import { STATUS_LABELS } from "@/features/tasks/taskLabels";
 import { RECURRENCE_PRESETS } from "@/features/automation/recurrenceLogic";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/toast-provider";
@@ -32,6 +32,10 @@ interface TaskDetailPanelProps {
 
 function profileName(profiles: Profile[], id: string): string {
   return profiles.find((p) => p.id === id)?.full_name ?? "Usuário";
+}
+
+function profileAvatarUrl(profiles: Profile[], id: string): string | null {
+  return profiles.find((p) => p.id === id)?.avatar_url ?? null;
 }
 
 export function TaskDetailPanel({
@@ -203,6 +207,9 @@ export function TaskDetailPanel({
           {assignees.map((id) => (
             <div key={id} className="neu-divider flex items-center gap-1.5 rounded-full border py-0.5 pl-0.5 pr-1.5 text-xs">
               <Avatar className="h-5 w-5">
+                {profileAvatarUrl(profiles, id) && (
+                  <AvatarImage src={profileAvatarUrl(profiles, id)!} alt={profileName(profiles, id)} />
+                )}
                 <AvatarFallback className="text-[10px]">{profileName(profiles, id).slice(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
               {profileName(profiles, id)}

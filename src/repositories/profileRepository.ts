@@ -22,3 +22,40 @@ export async function transferProfileTeam(profileId: string, teamId: string | nu
   const { error } = await supabase.from("profiles").update({ primary_team_id: teamId }).eq("id", profileId);
   if (error) throw error;
 }
+
+const AVATARS_BUCKET = "avatars";
+
+/** Uploads to `<profileId>/<kind>.<ext>` (overwriting any previous file at
+ * that path) and stamps a cache-busting query param on the public URL so
+ * the UI picks up the new image immediately instead of an old cached one. */
+async function uploadProfileMedia(
+  profileId: string,
+  file: File,
+  kind: "avatar" | "cover",
+  column: "avatar_url" | "cover_url",
+): Promise<string> {
+  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const path = `${profileId}/${kind}.${ext}`;
+
+  const { error: uploadError } = await supabase.storage.from(AVATARS_BUCKET).upload(path, file, {
+    upsert: true,
+    contentType: file.type || undefined,
+  });
+  if (uploadError) throw uploadError;
+
+  const { data } = supabase.storage.from(AVATARS_BUCKET).getPublicUrl(path);
+  const url = `${data.publicUrl}?t=${Date.now()}`;
+
+  const { error: updateError } = await supabase.from("profiles").update({ [column]: url }).eq("id", profileId);
+  if (updateError) throw updateError;
+
+  return url;
+}
+
+export function uploadAvatar(profileId: string, file: File): Promise<string> {
+  return uploadProfileMedia(profileId, file, "avatar", "avatar_url");
+}
+
+export function uploadCoverPhoto(profileId: string, file: File): Promise<string> {
+  return uploadProfileMedia(profileId, file, "cover", "cover_url");
+}

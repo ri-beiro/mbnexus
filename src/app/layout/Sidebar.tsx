@@ -23,7 +23,7 @@ function NavRow({ item, collapsed }: { item: NavItem; collapsed: boolean }) {
         cn(
           "group flex items-center gap-3 rounded-full px-3.5 py-2 text-sm font-medium text-sidebar-foreground/70 transition-all duration-300 hover:translate-x-0.5 hover:bg-[rgba(190,249,27,0.09)] hover:text-[var(--neu-lime-solid)]",
           isActive &&
-            "bg-primary text-primary-foreground font-semibold shadow-[6px_6px_14px_var(--neu-d),-4px_-4px_11px_var(--neu-l),0_0_20px_-8px_var(--neu-glow)] hover:translate-x-0 hover:bg-primary hover:text-primary-foreground",
+            "bg-primary text-primary-foreground font-semibold shadow-[6px_6px_14px_var(--neu-d),-4px_-4px_11px_var(--neu-l)] hover:translate-x-0 hover:bg-primary hover:text-primary-foreground",
           collapsed && "justify-center px-0 hover:translate-x-0",
         )
       }

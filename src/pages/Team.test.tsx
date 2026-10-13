@@ -32,6 +32,7 @@ function makeProfile(overrides: Partial<Profile> & { id: string; full_name: stri
     email: "user@mbnexus.dev",
     job_title: null,
     avatar_url: null,
+    cover_url: null,
     is_active: true,
     primary_team_id: null,
     created_at: "",

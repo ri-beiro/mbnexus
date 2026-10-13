@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/features/auth/useAuth";
-import { ROLE_LABELS } from "@/permissions/types";
+import { ProfilePanel } from "@/features/profile/ProfilePanel";
 import { HierarchyTree } from "@/features/hierarchy/HierarchyTree";
 import { UsersPanel } from "@/features/hierarchy/UsersPanel";
 import { NotificationPreferencesPanel } from "@/features/notifications/NotificationPreferencesPanel";
@@ -14,8 +14,6 @@ import { MicrosoftIntegrationPanel } from "@/features/integrations/MicrosoftInte
 const FUTURE_SECTIONS = ["Permissões avançadas", "Status personalizados", "Tags", "Auditoria"];
 
 export function Settings() {
-  const { profile, roles } = useAuth();
-
   return (
     <div className="space-y-6">
       <div>
@@ -36,20 +34,7 @@ export function Settings() {
         </TabsList>
 
         <TabsContent value="profile">
-          <Card>
-            <CardHeader>
-              <CardTitle>{profile?.full_name}</CardTitle>
-              <CardDescription>{profile?.email}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-2">
-              {roles.length === 0 && <Badge variant="secondary">Sem papel atribuído</Badge>}
-              {roles.map((r) => (
-                <Badge key={`${r.roleId}-${r.scopeId ?? "global"}`} variant="outline">
-                  {ROLE_LABELS[r.key]}
-                </Badge>
-              ))}
-            </CardContent>
-          </Card>
+          <ProfilePanel />
         </TabsContent>
 
         <TabsContent value="hierarchy">

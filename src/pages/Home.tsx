@@ -141,9 +141,17 @@ export function Home() {
           <div className="flex items-start gap-4">
             <div className="neu-radar h-16 w-16 shrink-0">
               <div className="neu-radar-sweep" />
-              <div className="neu-radar-core neu-surface-sm flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-[var(--neu-lime-solid)]">
-                {profile ? initials(profile.full_name) : null}
-              </div>
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt={profile.full_name}
+                  className="neu-radar-core neu-surface-sm h-11 w-11 rounded-full object-cover"
+                />
+              ) : (
+                <div className="neu-radar-core neu-surface-sm flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-[var(--neu-lime-solid)]">
+                  {profile ? initials(profile.full_name) : null}
+                </div>
+              )}
             </div>
             <div>
               <span className="neu-sunken inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
