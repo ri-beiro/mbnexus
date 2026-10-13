@@ -36,6 +36,9 @@ export async function createTask(input: CreateTaskInput): Promise<Task> {
       start_date: input.startDate ?? null,
       due_date: input.dueDate ?? null,
       created_by: input.createdBy,
+      // New cards always land at the bottom of their column — Date.now()
+      // is always greater than any pre-existing position without a query.
+      board_position: Date.now(),
     })
     .select()
     .single();
@@ -52,6 +55,7 @@ export interface UpdateTaskInput {
   dueDate?: string | null;
   progress?: number;
   recurrenceRule?: string | null;
+  boardPosition?: number;
 }
 
 const UPDATE_TASK_KEYS: Record<keyof UpdateTaskInput, string> = {
@@ -63,6 +67,7 @@ const UPDATE_TASK_KEYS: Record<keyof UpdateTaskInput, string> = {
   dueDate: "due_date",
   progress: "progress",
   recurrenceRule: "recurrence_rule",
+  boardPosition: "board_position",
 };
 
 export async function updateTask(taskId: string, patch: UpdateTaskInput): Promise<void> {

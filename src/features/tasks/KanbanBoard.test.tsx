@@ -20,6 +20,7 @@ function makeRow(overrides: Partial<TaskListRow> & { id: string; title: string }
     estimate_minutes: null,
     progress: 0,
     recurrence_rule: null,
+    board_position: null,
     created_by: "user-1",
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",
@@ -31,7 +32,7 @@ function makeRow(overrides: Partial<TaskListRow> & { id: string; title: string }
 
 describe("KanbanBoard", () => {
   it("renders a column for every status, with its label", () => {
-    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} />);
+    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} onMove={vi.fn()} />);
     for (const label of Object.values(STATUS_LABELS)) {
       expect(screen.getByText(label)).toBeInTheDocument();
     }
@@ -42,7 +43,7 @@ describe("KanbanBoard", () => {
       makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" }),
       makeRow({ id: "2", title: "Revisar contrato", status: "em_andamento" }),
     ];
-    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} />);
+    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} onMove={vi.fn()} />);
 
     const aFazerColumn = screen.getByTestId("kanban-column-a_fazer");
     const emAndamentoColumn = screen.getByTestId("kanban-column-em_andamento");
@@ -51,7 +52,7 @@ describe("KanbanBoard", () => {
   });
 
   it("shows an empty-column hint when a column has no cards", () => {
-    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} />);
+    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={vi.fn()} onMove={vi.fn()} />);
     const backlogColumn = screen.getByTestId("kanban-column-backlog");
     expect(within(backlogColumn).getByText(/sem tarefas/i)).toBeInTheDocument();
   });
@@ -60,7 +61,7 @@ describe("KanbanBoard", () => {
     const user = userEvent.setup();
     const onStatusChange = vi.fn();
     const tasks = [makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })];
-    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={onStatusChange} onCardClick={vi.fn()} onAddCard={vi.fn()} />);
+    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={onStatusChange} onCardClick={vi.fn()} onAddCard={vi.fn()} onMove={vi.fn()} />);
 
     const card = screen.getByText("Corrigir bug").closest("[data-kanban-card]") as HTMLElement;
     const select = within(card).getByLabelText(/status da tarefa/i);
@@ -74,7 +75,7 @@ describe("KanbanBoard", () => {
     const user = userEvent.setup();
     const onCardClick = vi.fn();
     const tasks = [makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })];
-    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={onCardClick} onAddCard={vi.fn()} />);
+    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={onCardClick} onAddCard={vi.fn()} onMove={vi.fn()} />);
 
     const card = screen.getByText("Corrigir bug").closest("[data-kanban-card]") as HTMLElement;
     await user.click(within(card).getByRole("button", { name: /ver detalhes de corrigir bug/i }));
@@ -85,7 +86,7 @@ describe("KanbanBoard", () => {
   it("calls onAddCard with the column's status when its add-card button is clicked", async () => {
     const user = userEvent.setup();
     const onAddCard = vi.fn();
-    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={onAddCard} />);
+    render(<KanbanBoard tasks={[]} profiles={[]} onStatusChange={vi.fn()} onCardClick={vi.fn()} onAddCard={onAddCard} onMove={vi.fn()} />);
 
     const column = screen.getByTestId("kanban-column-em_andamento");
     await user.click(within(column).getByRole("button", { name: /adicionar cartão/i }));

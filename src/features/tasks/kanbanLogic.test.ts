@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { groupTasksByStatus, moveTaskToStatus } from "@/features/tasks/kanbanLogic";
+import {
+  computeBoardPosition,
+  groupTasksByStatus,
+  moveTaskToStatus,
+  sortTasksByBoardPosition,
+} from "@/features/tasks/kanbanLogic";
 import { STATUS_ORDER } from "@/features/tasks/taskLabels";
 import type { TaskStatus } from "@/types/database";
 
@@ -59,5 +64,47 @@ describe("moveTaskToStatus", () => {
   it("is a no-op when the task id is not found", () => {
     const result = moveTaskToStatus(tasks, "missing", "concluido");
     expect(result).toEqual(tasks);
+  });
+});
+
+describe("sortTasksByBoardPosition", () => {
+  it("sorts ascending by board_position", () => {
+    const late = { id: "late", board_position: 2000 };
+    const early = { id: "early", board_position: 1000 };
+    expect(sortTasksByBoardPosition([late, early])).toEqual([early, late]);
+  });
+
+  it("places tasks with no position after every positioned task", () => {
+    const positioned = { id: "positioned", board_position: 1000 };
+    const unpositioned = { id: "unpositioned", board_position: null };
+    expect(sortTasksByBoardPosition([unpositioned, positioned])).toEqual([positioned, unpositioned]);
+  });
+
+  it("does not mutate the input array", () => {
+    const input = [
+      { id: "b", board_position: 2000 },
+      { id: "a", board_position: 1000 },
+    ];
+    const original = [...input];
+    sortTasksByBoardPosition(input);
+    expect(input).toEqual(original);
+  });
+});
+
+describe("computeBoardPosition", () => {
+  it("returns a default position for the first card in an empty column", () => {
+    expect(computeBoardPosition(null, null)).toBe(1000);
+  });
+
+  it("returns a position below the single card when dropped at the end", () => {
+    expect(computeBoardPosition(1000, null)).toBe(2000);
+  });
+
+  it("returns a position above the single card when dropped at the start", () => {
+    expect(computeBoardPosition(null, 1000)).toBe(0);
+  });
+
+  it("returns the midpoint when dropped between two cards", () => {
+    expect(computeBoardPosition(1000, 2000)).toBe(1500);
   });
 });

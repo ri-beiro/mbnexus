@@ -83,6 +83,7 @@ function makeSubtask(overrides: Partial<Task> & { id: string; title: string }): 
     estimate_minutes: null,
     progress: 0,
     recurrence_rule: null,
+    board_position: null,
     created_by: "user-1",
     created_at: "2026-01-01T00:00:00.000Z",
     updated_at: "2026-01-01T00:00:00.000Z",

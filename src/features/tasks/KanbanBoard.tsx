@@ -1,7 +1,17 @@
-import { Info, Plus } from "lucide-react";
-import { DndContext, useDraggable, useDroppable, type DragEndEvent } from "@dnd-kit/core";
-import { groupTasksByStatus } from "@/features/tasks/kanbanLogic";
-import { PRIORITY_ACCENT_COLOR, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
+import { useState } from "react";
+import { FileText, Info, Plus } from "lucide-react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  useDroppable,
+  type DragEndEvent,
+  type DragStartEvent,
+} from "@dnd-kit/core";
+import { useSortable, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { computeBoardPosition, groupTasksByStatus, sortTasksByBoardPosition } from "@/features/tasks/kanbanLogic";
+import { PRIORITY_ACCENT_COLOR, PRIORITY_LABELS, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import type { TaskListRow } from "@/repositories/taskRepository";
@@ -11,6 +21,7 @@ interface KanbanBoardProps {
   tasks: TaskListRow[];
   profiles: Profile[];
   onStatusChange: (taskId: string, status: TaskStatus) => void;
+  onMove: (taskId: string, status: TaskStatus, boardPosition: number) => void;
   onCardClick: (taskId: string) => void;
   onAddCard: (status: TaskStatus) => void;
 }
@@ -44,6 +55,41 @@ function CardAssignees({ profiles, assigneeIds }: { profiles: Profile[]; assigne
   );
 }
 
+/** The card face shared by the sortable card and its DragOverlay clone —
+ * Trello's own anatomy: a colored label pill, title, optional description
+ * marker, then a bottom row with due date on the left and avatars on the
+ * right. */
+function CardFace({ task, profiles }: { task: TaskListRow; profiles: Profile[] }) {
+  return (
+    <div className="space-y-2">
+      <span
+        className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[.04em]"
+        style={{ backgroundColor: `color-mix(in srgb, ${PRIORITY_ACCENT_COLOR[task.priority]} 22%, transparent)`, color: PRIORITY_ACCENT_COLOR[task.priority] }}
+      >
+        {PRIORITY_LABELS[task.priority]}
+      </span>
+
+      <p className="text-sm font-medium leading-snug">{task.title}</p>
+
+      {task.project_name && <p className="truncate text-xs text-muted-foreground">{task.project_name}</p>}
+
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          {task.due_date && (
+            <span className="neu-sunken rounded-full px-2 py-0.5 font-mono text-[10px] text-muted-foreground">{task.due_date}</span>
+          )}
+          {task.description && (
+            <span title="Tem descrição" className="text-muted-foreground">
+              <FileText className="h-3 w-3" />
+            </span>
+          )}
+        </div>
+        <CardAssignees profiles={profiles} assigneeIds={task.assigneeIds} />
+      </div>
+    </div>
+  );
+}
+
 function KanbanCard({
   task,
   index,
@@ -57,26 +103,29 @@ function KanbanCard({
   onStatusChange: (status: TaskStatus) => void;
   onCardClick: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: task.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.id });
 
   return (
     <div
       ref={setNodeRef}
       data-kanban-card
       style={{
-        ...(transform ? { transform: `translate(${transform.x}px, ${transform.y}px)` } : undefined),
+        transform: CSS.Transform.toString(transform),
+        transition,
         animationDelay: `${Math.min(index, 8) * 45}ms`,
         borderTopColor: PRIORITY_ACCENT_COLOR[task.priority],
       }}
       className={cn(
-        "neu-surface-sm neu-surface-hover neu-fade-up cursor-grab space-y-2 rounded-xl border-t-[3px] p-3 text-sm active:cursor-grabbing",
-        isDragging && "z-10 opacity-70",
+        "neu-surface-sm neu-surface-hover neu-fade-up cursor-grab rounded-xl border-t-[3px] p-3 text-sm active:cursor-grabbing",
+        isDragging && "opacity-40",
       )}
       {...attributes}
       {...listeners}
     >
       <div className="flex items-start justify-between gap-1.5">
-        <p className="font-medium leading-snug">{task.title}</p>
+        <div className="min-w-0 flex-1">
+          <CardFace task={task} profiles={profiles} />
+        </div>
         <button
           type="button"
           onPointerDown={(e) => e.stopPropagation()}
@@ -88,17 +137,6 @@ function KanbanCard({
         </button>
       </div>
 
-      {task.project_name && <p className="truncate text-xs text-muted-foreground">{task.project_name}</p>}
-
-      <div className="flex items-center justify-between gap-2">
-        <CardAssignees profiles={profiles} assigneeIds={task.assigneeIds} />
-        {task.due_date && (
-          <span className="neu-sunken shrink-0 rounded-full px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
-            {task.due_date}
-          </span>
-        )}
-      </div>
-
       {/* Keyboard/screen-reader-accessible alternative to dragging — also
           what the automated tests exercise, since simulating real pointer
           drag physics in jsdom isn't meaningful; dragging itself is a
@@ -108,7 +146,7 @@ function KanbanCard({
         value={task.status}
         onPointerDown={(e) => e.stopPropagation()}
         onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-        className="neu-select h-7 w-full rounded-full border-0 bg-black/10 px-2.5 text-[11px] text-muted-foreground outline-none focus-visible:neu-focus dark:bg-white/5"
+        className="neu-select mt-2 h-7 w-full rounded-full border-0 bg-black/10 px-2.5 text-[11px] text-muted-foreground outline-none focus-visible:neu-focus dark:bg-white/5"
       >
         {STATUS_ORDER.map((status) => (
           <option key={status} value={status}>
@@ -160,23 +198,25 @@ function KanbanColumn({
         </div>
       </div>
 
-      <div className="flex max-h-[calc(100vh-20rem)] flex-col gap-2 overflow-y-auto px-0.5 py-0.5">
-        {tasks.length === 0 && (
-          <p className="neu-divider rounded-xl border border-dashed p-3 text-center text-xs text-muted-foreground">
-            Sem tarefas nesta coluna.
-          </p>
-        )}
-        {tasks.map((task, index) => (
-          <KanbanCard
-            key={task.id}
-            task={task}
-            index={index}
-            profiles={profiles}
-            onStatusChange={(s) => onStatusChange(task.id, s)}
-            onCardClick={() => onCardClick(task.id)}
-          />
-        ))}
-      </div>
+      <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex max-h-[calc(100vh-20rem)] flex-col gap-2 overflow-y-auto px-0.5 py-0.5">
+          {tasks.length === 0 && (
+            <p className="neu-divider rounded-xl border border-dashed p-3 text-center text-xs text-muted-foreground">
+              Sem tarefas nesta coluna.
+            </p>
+          )}
+          {tasks.map((task, index) => (
+            <KanbanCard
+              key={task.id}
+              task={task}
+              index={index}
+              profiles={profiles}
+              onStatusChange={(s) => onStatusChange(task.id, s)}
+              onCardClick={() => onCardClick(task.id)}
+            />
+          ))}
+        </div>
+      </SortableContext>
 
       <button
         type="button"
@@ -189,19 +229,44 @@ function KanbanColumn({
   );
 }
 
-export function KanbanBoard({ tasks, profiles, onStatusChange, onCardClick, onAddCard }: KanbanBoardProps) {
-  const columns = groupTasksByStatus(tasks);
+export function KanbanBoard({ tasks, profiles, onStatusChange, onMove, onCardClick, onAddCard }: KanbanBoardProps) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const grouped = groupTasksByStatus(tasks);
+  const columns = Object.fromEntries(
+    STATUS_ORDER.map((status) => [status, sortTasksByBoardPosition(grouped[status])]),
+  ) as Record<TaskStatus, TaskListRow[]>;
+
+  const activeTask = activeId ? tasks.find((t) => t.id === activeId) ?? null : null;
+
+  function handleDragStart(event: DragStartEvent) {
+    setActiveId(event.active.id as string);
+  }
 
   function handleDragEnd(event: DragEndEvent) {
-    const taskId = event.active.id as string;
-    const newStatus = event.over?.id as TaskStatus | undefined;
-    if (!newStatus) return;
-    const task = tasks.find((t) => t.id === taskId);
-    if (task && task.status !== newStatus) onStatusChange(taskId, newStatus);
+    setActiveId(null);
+    const { active, over } = event;
+    if (!over) return;
+
+    const dragged = tasks.find((t) => t.id === active.id);
+    if (!dragged) return;
+
+    const overIsColumn = (STATUS_ORDER as string[]).includes(over.id as string);
+    const destStatus = overIsColumn ? (over.id as TaskStatus) : tasks.find((t) => t.id === over.id)?.status ?? dragged.status;
+
+    const destColumn = columns[destStatus].filter((t) => t.id !== dragged.id);
+    const overIndex = overIsColumn ? destColumn.length : destColumn.findIndex((t) => t.id === over.id);
+    const insertAt = overIndex === -1 ? destColumn.length : overIndex;
+
+    const before = insertAt > 0 ? destColumn[insertAt - 1].board_position : null;
+    const after = insertAt < destColumn.length ? destColumn[insertAt].board_position : null;
+    const newPosition = computeBoardPosition(before, after);
+
+    if (destStatus === dragged.status && newPosition === dragged.board_position) return;
+    onMove(dragged.id, destStatus, newPosition);
   }
 
   return (
-    <DndContext onDragEnd={handleDragEnd}>
+    <DndContext collisionDetection={closestCorners} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-2">
         {STATUS_ORDER.map((status) => (
           <KanbanColumn
@@ -215,6 +280,16 @@ export function KanbanBoard({ tasks, profiles, onStatusChange, onCardClick, onAd
           />
         ))}
       </div>
+      <DragOverlay>
+        {activeTask && (
+          <div
+            className="neu-surface-sm w-72 rounded-xl border-t-[3px] p-3 text-sm shadow-xl"
+            style={{ borderTopColor: PRIORITY_ACCENT_COLOR[activeTask.priority] }}
+          >
+            <CardFace task={activeTask} profiles={profiles} />
+          </div>
+        )}
+      </DragOverlay>
     </DndContext>
   );
 }

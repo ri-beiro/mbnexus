@@ -46,6 +46,19 @@ export function Kanban() {
     }
   }
 
+  async function handleMove(taskId: string, status: TaskStatus, boardPosition: number) {
+    try {
+      await updateTask(taskId, { status, boardPosition });
+      await reload();
+    } catch (err) {
+      toast({
+        title: "Não foi possível mover a tarefa",
+        description: err instanceof Error ? err.message : undefined,
+        variant: "destructive",
+      });
+    }
+  }
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -113,6 +126,7 @@ export function Kanban() {
           tasks={tasks}
           profiles={profiles}
           onStatusChange={handleStatusChange}
+          onMove={handleMove}
           onCardClick={setSelectedTaskId}
           onAddCard={handleAddCard}
         />

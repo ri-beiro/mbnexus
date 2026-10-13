@@ -180,6 +180,7 @@ export interface Task {
   estimate_minutes: number | null;
   progress: number;
   recurrence_rule: string | null;
+  board_position: number | null;
   created_by: string;
   created_at: string;
   updated_at: string;
