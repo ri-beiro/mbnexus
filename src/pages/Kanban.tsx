@@ -23,7 +23,13 @@ export function Kanban() {
   const { toast } = useToast();
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [createStatus, setCreateStatus] = useState<TaskStatus>("backlog");
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+
+  function handleAddCard(status: TaskStatus) {
+    setCreateStatus(status);
+    setCreateOpen(true);
+  }
 
   const selectedTask = tasks.find((t) => t.id === selectedTaskId) ?? null;
 
@@ -49,7 +55,13 @@ export function Kanban() {
           </h1>
           <p className="text-sm text-muted-foreground">Arraste um cartão entre colunas para mudar o status.</p>
         </div>
-        <Button type="button" onClick={() => setCreateOpen(true)}>
+        <Button
+          type="button"
+          onClick={() => {
+            setCreateStatus("backlog");
+            setCreateOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4" /> Nova tarefa
         </Button>
       </div>
@@ -61,6 +73,7 @@ export function Kanban() {
           organizationId={profile.organization_id}
           createdBy={profile.id}
           profiles={profiles}
+          defaultStatus={createStatus}
           onCreated={reload}
         />
       )}
@@ -96,7 +109,13 @@ export function Kanban() {
       ) : error ? (
         <EmptyState icon={LayoutGrid} title="Erro ao carregar o board" description={error} />
       ) : (
-        <KanbanBoard tasks={tasks} onStatusChange={handleStatusChange} onCardClick={setSelectedTaskId} />
+        <KanbanBoard
+          tasks={tasks}
+          profiles={profiles}
+          onStatusChange={handleStatusChange}
+          onCardClick={setSelectedTaskId}
+          onAddCard={handleAddCard}
+        />
       )}
     </div>
   );

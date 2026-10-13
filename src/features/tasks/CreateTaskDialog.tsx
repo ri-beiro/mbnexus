@@ -27,6 +27,7 @@ interface CreateTaskDialogProps {
   createdBy: string;
   profiles: Profile[];
   defaultProjectId?: string | null;
+  defaultStatus?: TaskStatus;
   onCreated?: () => void;
 }
 
@@ -45,6 +46,7 @@ export function CreateTaskDialog({
   createdBy,
   profiles,
   defaultProjectId = null,
+  defaultStatus = "backlog",
   onCreated,
 }: CreateTaskDialogProps) {
   const { toast } = useToast();
@@ -61,16 +63,18 @@ export function CreateTaskDialog({
 
   useEffect(() => {
     if (!open) return;
+    setStatus(defaultStatus);
     listProjects()
       .then(setProjects)
       .catch(() => setProjects([]));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   function resetForm() {
     setTitle("");
     setDescription("");
     setPriority("normal");
-    setStatus("backlog");
+    setStatus(defaultStatus);
     setStartDate("");
     setDueDate("");
     setProjectId(defaultProjectId ?? "");

@@ -28,3 +28,14 @@ export const PRIORITY_BADGE_VARIANT: Record<TaskPriority, "secondary" | "default
   urgente: "warning",
   critica: "destructive",
 };
+
+/** A small accent color per priority, used for Kanban card top-bars and the
+ * priority indicator dot on list rows — keeps the two views visually
+ * consistent instead of each inventing its own palette. */
+export const PRIORITY_ACCENT_COLOR: Record<TaskPriority, string> = {
+  baixa: "var(--neu-text-label)",
+  normal: "var(--neu-text-label)",
+  alta: "var(--neu-lime-solid)",
+  urgente: "#e8b43b",
+  critica: "var(--neu-error-text)",
+};

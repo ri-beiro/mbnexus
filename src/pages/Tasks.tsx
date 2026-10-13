@@ -11,7 +11,7 @@ import {
   splitByDueDate,
   type TaskFilters,
 } from "@/features/tasks/taskLogic";
-import { PRIORITY_LABELS, PRIORITY_ORDER, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
+import { PRIORITY_ACCENT_COLOR, PRIORITY_LABELS, PRIORITY_ORDER, STATUS_LABELS, STATUS_ORDER } from "@/features/tasks/taskLabels";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
 import { CreateTaskDialog } from "@/features/tasks/CreateTaskDialog";
 import { updateTask } from "@/repositories/taskRepository";
@@ -108,7 +108,12 @@ function TaskRow({
           <CircleCheck className="h-4 w-4" />
         </button>
 
-        <button type="button" onClick={onToggleExpand} className="text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]" aria-label={expanded ? "Recolher tarefa" : "Expandir tarefa"}>
+        <button
+          type="button"
+          onClick={onToggleExpand}
+          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-[rgba(190,249,27,0.1)] hover:text-[var(--neu-lime-solid)]"
+          aria-label={expanded ? "Recolher tarefa" : "Expandir tarefa"}
+        >
           {expanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
         </button>
 
@@ -123,24 +128,31 @@ function TaskRow({
           <span className={cn("text-xs font-medium", isUrgent ? "text-destructive" : "text-muted-foreground")}>{dueLabel}</span>
         )}
 
-        <select
-          aria-label="Prioridade da tarefa"
-          value={task.priority}
-          onChange={(e) => onPriorityChange(e.target.value as TaskPriority)}
-          className="neu-select h-9 rounded-full border-0 bg-black/10 px-3 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
-        >
-          {PRIORITY_ORDER.map((p) => (
-            <option key={p} value={p}>
-              {PRIORITY_LABELS[p]}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute left-2.5 top-1/2 h-1.5 w-1.5 -translate-y-1/2 rounded-full"
+            style={{ backgroundColor: PRIORITY_ACCENT_COLOR[task.priority] }}
+          />
+          <select
+            aria-label="Prioridade da tarefa"
+            value={task.priority}
+            onChange={(e) => onPriorityChange(e.target.value as TaskPriority)}
+            className="neu-select h-9 rounded-full border-0 bg-black/10 py-0 pl-6 pr-3 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
+          >
+            {PRIORITY_ORDER.map((p) => (
+              <option key={p} value={p}>
+                {PRIORITY_LABELS[p]}
+              </option>
+            ))}
+          </select>
+        </div>
 
         <select
           aria-label="Status da tarefa"
           value={task.status}
           onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-          className="neu-select h-9 rounded-full border-0 bg-black/10 px-3 text-xs outline-none focus-visible:neu-focus dark:bg-white/5"
+          className="neu-select h-9 rounded-full border-0 bg-black/10 px-3 text-xs outline-none transition-colors hover:bg-black/15 focus-visible:neu-focus dark:bg-white/5 dark:hover:bg-white/10"
         >
           {STATUS_ORDER.map((status) => (
             <option key={status} value={status}>
@@ -392,12 +404,19 @@ export function Tasks() {
             className={cn(
               "flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-medium transition-all duration-200",
               quickView === v.key
-                ? "bg-[rgba(190,249,27,0.14)] text-[var(--neu-lime-solid)]"
+                ? "neu-surface-sm text-[var(--neu-lime-solid)]"
                 : "text-muted-foreground hover:bg-[rgba(190,249,27,0.08)] hover:text-[var(--neu-lime-solid)]",
             )}
           >
             {v.label}
-            <span className="font-mono text-[10px] opacity-70">{v.count}</span>
+            <span
+              className={cn(
+                "flex h-4 min-w-4 items-center justify-center rounded-full px-1 font-mono text-[10px]",
+                quickView === v.key ? "bg-[rgba(190,249,27,0.16)]" : "opacity-70",
+              )}
+            >
+              {v.count}
+            </span>
           </button>
         ))}
       </nav>
