@@ -55,7 +55,11 @@ export function NotificationCenter() {
   return (
     <DropdownMenu open={open} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative" aria-label="Notificações">
+        <button
+          type="button"
+          aria-label="Notificações"
+          className="neu-surface-sm neu-surface-hover relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--neu-text-secondary)]"
+        >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
             <span className="neu-pop-in absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground shadow-[0_0_0_2px_var(--neu-surface-from)]">
@@ -63,7 +67,7 @@ export function NotificationCenter() {
               <span className="relative">{unreadCount > 9 ? "9+" : unreadCount}</span>
             </span>
           )}
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between px-3 py-2">

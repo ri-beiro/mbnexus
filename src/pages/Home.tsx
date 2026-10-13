@@ -139,16 +139,16 @@ export function Home() {
       <section className="neu-surface neu-grid-bg neu-fade-up overflow-hidden p-6 md:p-8">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4">
-            <div className="neu-radar h-16 w-16 shrink-0">
+            <div className="neu-radar h-24 w-24 shrink-0 sm:h-28 sm:w-28">
               <div className="neu-radar-sweep" />
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
                   alt={profile.full_name}
-                  className="neu-radar-core neu-surface-sm h-11 w-11 rounded-full object-cover"
+                  className="neu-radar-core neu-surface-sm h-16 w-16 rounded-full object-cover sm:h-[4.5rem] sm:w-[4.5rem]"
                 />
               ) : (
-                <div className="neu-radar-core neu-surface-sm flex h-11 w-11 items-center justify-center rounded-full text-sm font-semibold text-[var(--neu-lime-solid)]">
+                <div className="neu-radar-core neu-surface-sm flex h-16 w-16 items-center justify-center rounded-full text-lg font-semibold text-[var(--neu-lime-solid)] sm:h-[4.5rem] sm:w-[4.5rem]">
                   {profile ? initials(profile.full_name) : null}
                 </div>
               )}

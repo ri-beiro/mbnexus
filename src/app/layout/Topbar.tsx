@@ -42,11 +42,15 @@ export function Topbar() {
     <header className="flex h-16 shrink-0 items-center gap-3 bg-background px-5">
       <button
         onClick={palette.open}
-        className="neu-sunken flex w-full max-w-sm items-center gap-2 px-3.5 py-2 text-sm text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
+        className="neu-sunken group flex w-full max-w-sm items-center gap-2.5 py-2.5 pl-2.5 pr-3.5 text-sm text-muted-foreground transition-all duration-200 hover:text-[var(--neu-lime-solid)]"
       >
-        <Search className="h-4 w-4" />
+        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-[rgba(190,249,27,0.12)] text-[var(--neu-lime-solid)] transition-transform duration-200 group-hover:scale-110">
+          <Search className="h-3.5 w-3.5" />
+        </span>
         <span className="flex-1 text-left">Buscar…</span>
-        <kbd className="rounded-md bg-black/10 px-1.5 py-0.5 text-[10px] dark:bg-white/5">Ctrl K</kbd>
+        <kbd className="neu-divider rounded-md border bg-transparent px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+          Ctrl K
+        </kbd>
       </button>
       <CommandPalette open={palette.isOpen} onOpenChange={palette.setOpen} />
 
@@ -67,17 +71,23 @@ export function Topbar() {
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Button variant="ghost" size="icon" onClick={() => navigate("/calendar")} aria-label="Calendário">
-        <Calendar className="h-4 w-4" />
-      </Button>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={() => navigate("/calendar")}
+          aria-label="Calendário"
+          className="neu-surface-sm neu-surface-hover flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-[var(--neu-text-secondary)]"
+        >
+          <Calendar className="h-4 w-4" />
+        </button>
 
-      <NotificationCenter />
+        <NotificationCenter />
 
-      <ThemeToggle />
+        <ThemeToggle />
+      </div>
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <button className="neu-surface-sm neu-surface-hover flex items-center gap-2 rounded-full p-0.5">
+          <button className="neu-surface-sm neu-surface-hover ml-1 flex items-center gap-2 rounded-full p-0.5">
             <Avatar>
               {profile?.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name} />}
               <AvatarFallback>{profile ? initials(profile.full_name) : <User className="h-4 w-4" />}</AvatarFallback>

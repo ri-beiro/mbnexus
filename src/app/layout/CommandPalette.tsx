@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { PRIMARY_NAV, MANAGEMENT_NAV, SETTINGS_NAV } from "@/app/nav-config";
 
@@ -32,13 +33,16 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="top-[20%] max-w-md translate-y-0 p-0">
         <DialogTitle className="sr-only">Busca global</DialogTitle>
-        <input
-          autoFocus
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Ir para…"
-          className="neu-divider w-full border-b bg-transparent px-4 py-3 text-sm outline-none"
-        />
+        <div className="neu-divider flex items-center gap-2.5 border-b px-4 py-3">
+          <Search className="h-4 w-4 shrink-0 text-[var(--neu-lime-solid)]" />
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Ir para…"
+            className="w-full bg-transparent text-sm outline-none"
+          />
+        </div>
         <div className="max-h-80 overflow-y-auto p-2">
           {results.length === 0 && <p className="px-3 py-6 text-center text-sm text-muted-foreground">Nenhum resultado.</p>}
           {results.map((item) => {
@@ -51,9 +55,11 @@ export function CommandPalette({ open, onOpenChange }: { open: boolean; onOpenCh
                   onOpenChange(false);
                   setQuery("");
                 }}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-[rgba(190,249,27,0.1)] hover:text-[var(--neu-lime-solid)]"
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors hover:bg-[rgba(190,249,27,0.1)] hover:text-[var(--neu-lime-solid)]"
               >
-                <Icon className="h-4 w-4 text-muted-foreground" />
+                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[rgba(190,249,27,0.08)] transition-transform duration-200 group-hover:scale-110">
+                  <Icon className="h-4 w-4 text-muted-foreground group-hover:text-[var(--neu-lime-solid)]" />
+                </span>
                 {item.label}
               </button>
             );
