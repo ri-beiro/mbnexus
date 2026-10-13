@@ -39,7 +39,11 @@ interface ProfileHoverCardProps {
  * shown on hover, so coworkers can reach someone's Teams/WhatsApp — and see
  * their CD and who they report to — without opening their full profile. */
 export function ProfileHoverCard({ profile, children }: ProfileHoverCardProps) {
-  const [orgInfo, setOrgInfo] = useState<{ cdName: string | null; reportsToName: string | null } | null>(null);
+  const [orgInfo, setOrgInfo] = useState<{
+    cdName: string | null;
+    setorName: string | null;
+    reportsToName: string | null;
+  } | null>(null);
   const [loadedForId, setLoadedForId] = useState<string | null>(null);
 
   async function loadOrgInfo() {
@@ -47,14 +51,14 @@ export function ProfileHoverCard({ profile, children }: ProfileHoverCardProps) {
     setLoadedForId(profile.id);
     try {
       const snapshot = await fetchOrgHierarchySnapshot();
-      const { cdName, reportsToProfileId } = resolveProfileOrgContext(
+      const { cdName, setorName, reportsToProfileId } = resolveProfileOrgContext(
         { id: profile.id, primary_team_id: profile.primary_team_id },
         snapshot,
       );
       const reportsTo = reportsToProfileId ? await getProfile(reportsToProfileId) : null;
-      setOrgInfo({ cdName, reportsToName: reportsTo?.full_name ?? null });
+      setOrgInfo({ cdName, setorName, reportsToName: reportsTo?.full_name ?? null });
     } catch {
-      setOrgInfo({ cdName: null, reportsToName: null });
+      setOrgInfo({ cdName: null, setorName: null, reportsToName: null });
     }
   }
 
@@ -74,11 +78,12 @@ export function ProfileHoverCard({ profile, children }: ProfileHoverCardProps) {
           </div>
         </div>
 
-        {(orgInfo?.cdName || orgInfo?.reportsToName) && (
+        {(orgInfo?.cdName || orgInfo?.setorName || orgInfo?.reportsToName) && (
           <div className="mt-3 space-y-1 border-t border-[var(--neu-divider)] pt-3 text-xs">
-            {orgInfo.cdName && (
+            {(orgInfo.cdName || orgInfo.setorName) && (
               <p className="flex items-center gap-1.5 text-muted-foreground">
-                <Briefcase className="h-3.5 w-3.5 shrink-0" /> {orgInfo.cdName}
+                <Briefcase className="h-3.5 w-3.5 shrink-0" />
+                {[orgInfo.cdName, orgInfo.setorName].filter(Boolean).join(" · ")}
               </p>
             )}
             {orgInfo.reportsToName && (

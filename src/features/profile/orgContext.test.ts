@@ -49,26 +49,26 @@ const snapshot = { teams, departments, managementUnits };
 describe("resolveProfileOrgContext", () => {
   it("resolves the CD and reports-to (team leader) for a regular team member", () => {
     const ctx = resolveProfileOrgContext({ id: "member-1", primary_team_id: "team-1" }, snapshot);
-    expect(ctx).toEqual({ cdName: "CD Food Town", reportsToProfileId: "leader-1" });
+    expect(ctx).toEqual({ cdName: "CD Food Town", setorName: "Transportes", reportsToProfileId: "leader-1" });
   });
 
   it("has the team leader report to the department coordinator instead of themselves", () => {
     const ctx = resolveProfileOrgContext({ id: "leader-1", primary_team_id: "team-1" }, snapshot);
-    expect(ctx).toEqual({ cdName: "CD Food Town", reportsToProfileId: "coord-1" });
+    expect(ctx).toEqual({ cdName: "CD Food Town", setorName: "Transportes", reportsToProfileId: "coord-1" });
   });
 
   it("has a department coordinator (no team) report to the management unit manager", () => {
     const ctx = resolveProfileOrgContext({ id: "coord-1", primary_team_id: null }, snapshot);
-    expect(ctx).toEqual({ cdName: "CD Food Town", reportsToProfileId: "manager-1" });
+    expect(ctx).toEqual({ cdName: "CD Food Town", setorName: "Transportes", reportsToProfileId: "manager-1" });
   });
 
   it("has the management unit manager report to no one", () => {
     const ctx = resolveProfileOrgContext({ id: "manager-1", primary_team_id: null }, snapshot);
-    expect(ctx).toEqual({ cdName: "CD Food Town", reportsToProfileId: null });
+    expect(ctx).toEqual({ cdName: "CD Food Town", setorName: null, reportsToProfileId: null });
   });
 
   it("returns nulls for a profile with no team and no hierarchy role", () => {
     const ctx = resolveProfileOrgContext({ id: "nobody", primary_team_id: null }, snapshot);
-    expect(ctx).toEqual({ cdName: null, reportsToProfileId: null });
+    expect(ctx).toEqual({ cdName: null, setorName: null, reportsToProfileId: null });
   });
 });

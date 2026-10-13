@@ -63,6 +63,17 @@ export async function createTeam(input: { name: string; departmentId: string; de
   if (error) throw error;
 }
 
+/** Used by the CD bulk-import dialog — one insert call for every parsed
+ * name instead of a create-dialog round trip per CD. */
+export async function bulkCreateManagementUnits(names: string[]): Promise<void> {
+  if (names.length === 0) return;
+  const orgId = await currentOrganizationId();
+  const { error } = await supabase
+    .from("management_units")
+    .insert(names.map((name) => ({ organization_id: orgId, name })));
+  if (error) throw error;
+}
+
 export async function setManagementUnitActive(id: string, isActive: boolean): Promise<void> {
   const { error } = await supabase.from("management_units").update({ is_active: isActive }).eq("id", id);
   if (error) throw error;

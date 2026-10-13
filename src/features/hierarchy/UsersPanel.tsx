@@ -1,4 +1,5 @@
-import { UserCog } from "lucide-react";
+import { useState } from "react";
+import { Plus, UserCog } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,11 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/components/ui/toast-provider";
 import { RequirePermission } from "@/permissions/RequirePermission";
 import { useHierarchyData } from "@/features/hierarchy/useHierarchyData";
+import { CreateUserDialog } from "@/features/hierarchy/CreateUserDialog";
 import { setProfileActive, transferProfileTeam } from "@/repositories/profileRepository";
 
 export function UsersPanel() {
   const { data, loading, error, reload } = useHierarchyData();
   const { toast } = useToast();
+  const [createOpen, setCreateOpen] = useState(false);
 
   if (loading) return <Skeleton className="h-72" />;
   if (error) return <EmptyState icon={UserCog} title="Erro ao carregar" description={error} />;
@@ -41,6 +44,14 @@ export function UsersPanel() {
 
   return (
     <div className="neu-surface flex flex-col gap-2 p-4">
+      <RequirePermission permission="user.manage">
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setCreateOpen(true)}>
+            <Plus className="h-4 w-4" /> Novo usuário
+          </Button>
+        </div>
+      </RequirePermission>
+
       {data.profiles.map((p) => (
         <div key={p.id} className="neu-sunken flex flex-wrap items-center gap-3 px-3.5 py-2.5">
           <ProfileHoverCard profile={p}>
@@ -78,6 +89,14 @@ export function UsersPanel() {
           </RequirePermission>
         </div>
       ))}
+
+      <CreateUserDialog
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        managementUnits={data.managementUnits}
+        departments={data.departments}
+        onCreated={reload}
+      />
     </div>
   );
 }

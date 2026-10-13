@@ -17,13 +17,24 @@ vi.mock("@/repositories/profileRepository", () => ({
   setCoverPreset: vi.fn(),
 }));
 
+vi.mock("@/repositories/hierarchyRepository", () => ({
+  listTeams: vi.fn(),
+  listDepartments: vi.fn(),
+  listManagementUnits: vi.fn(),
+}));
+
 import { ProfilePanel } from "@/features/profile/ProfilePanel";
+import { resetOrgHierarchySnapshotCache } from "@/features/profile/orgContext";
 import { setCoverPreset, updateProfileDetails, uploadAvatar, uploadCoverPhoto } from "@/repositories/profileRepository";
+import { listDepartments, listManagementUnits, listTeams } from "@/repositories/hierarchyRepository";
 
 const mockUploadAvatar = vi.mocked(uploadAvatar);
 const mockUploadCoverPhoto = vi.mocked(uploadCoverPhoto);
 const mockUpdateProfileDetails = vi.mocked(updateProfileDetails);
 const mockSetCoverPreset = vi.mocked(setCoverPreset);
+const mockListTeams = vi.mocked(listTeams);
+const mockListDepartments = vi.mocked(listDepartments);
+const mockListManagementUnits = vi.mocked(listManagementUnits);
 
 function makeProfile(overrides: Partial<Profile> = {}): Profile {
   return {
@@ -70,6 +81,10 @@ beforeEach(() => {
   mockUploadCoverPhoto.mockReset();
   mockUpdateProfileDetails.mockReset().mockResolvedValue(undefined);
   mockSetCoverPreset.mockReset().mockResolvedValue(undefined);
+  resetOrgHierarchySnapshotCache();
+  mockListTeams.mockReset().mockResolvedValue([]);
+  mockListDepartments.mockReset().mockResolvedValue([]);
+  mockListManagementUnits.mockReset().mockResolvedValue([]);
 });
 
 describe("ProfilePanel", () => {

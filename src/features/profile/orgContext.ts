@@ -9,6 +9,7 @@ export interface OrgHierarchySnapshot {
 
 export interface ProfileOrgContext {
   cdName: string | null;
+  setorName: string | null;
   reportsToProfileId: string | null;
 }
 
@@ -36,11 +37,11 @@ export function resolveProfileOrgContext(
       reportsToProfileId = managementUnit.manager_profile_id;
     }
 
-    return { cdName: managementUnit?.name ?? null, reportsToProfileId };
+    return { cdName: managementUnit?.name ?? null, setorName: department?.name ?? null, reportsToProfileId };
   }
 
   const managedUnit = snapshot.managementUnits.find((m) => m.manager_profile_id === profile.id);
-  if (managedUnit) return { cdName: managedUnit.name, reportsToProfileId: null };
+  if (managedUnit) return { cdName: managedUnit.name, setorName: null, reportsToProfileId: null };
 
   const coordinatedDept = snapshot.departments.find((d) => d.coordinator_profile_id === profile.id);
   if (coordinatedDept) {
@@ -49,10 +50,10 @@ export function resolveProfileOrgContext(
       managementUnit?.manager_profile_id && managementUnit.manager_profile_id !== profile.id
         ? managementUnit.manager_profile_id
         : null;
-    return { cdName: managementUnit?.name ?? null, reportsToProfileId };
+    return { cdName: managementUnit?.name ?? null, setorName: coordinatedDept.name, reportsToProfileId };
   }
 
-  return { cdName: null, reportsToProfileId: null };
+  return { cdName: null, setorName: null, reportsToProfileId: null };
 }
 
 let cachedSnapshot: Promise<OrgHierarchySnapshot> | null = null;

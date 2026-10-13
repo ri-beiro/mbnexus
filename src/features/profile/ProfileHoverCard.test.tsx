@@ -103,7 +103,7 @@ describe("ProfileHoverCard", () => {
     renderCard(makeProfile({ id: "member-1", primary_team_id: "team-1" }));
     await user.hover(screen.getByRole("button", { name: "trigger" }));
 
-    expect(await screen.findByText("CD Food Town")).toBeInTheDocument();
+    expect(await screen.findByText("CD Food Town · Transportes")).toBeInTheDocument();
     expect(await screen.findByText(/responde a carlos líder/i)).toBeInTheDocument();
   });
 });

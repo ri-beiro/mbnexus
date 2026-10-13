@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Building2, Plus, Users2 } from "lucide-react";
+import { Building2, Plus, Upload, Users2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +10,7 @@ import { RequirePermission } from "@/permissions/RequirePermission";
 import { useHierarchyData } from "@/features/hierarchy/useHierarchyData";
 import { createDepartment, createManagementUnit, createTeam } from "@/repositories/hierarchyRepository";
 import { CreateHierarchyNodeDialog } from "@/features/hierarchy/CreateHierarchyNodeDialog";
+import { ImportCdsDialog } from "@/features/hierarchy/ImportCdsDialog";
 
 export function HierarchyTree() {
   const { data, loading, error, reload } = useHierarchyData();
@@ -21,6 +22,7 @@ export function HierarchyTree() {
     | { kind: "team"; departmentId: string }
     | null
   >(null);
+  const [importOpen, setImportOpen] = useState(false);
 
   if (loading) return <Skeleton className="h-72" />;
   if (error) return <EmptyState icon={Building2} title="Erro ao carregar" description={error} />;
@@ -53,9 +55,14 @@ export function HierarchyTree() {
           Empresa → Gerência → Coordenação → Equipe → Funcionários
         </p>
         <RequirePermission permission="hierarchy.manage">
-          <Button size="sm" variant="outline" onClick={() => setDialog({ kind: "management_unit" })}>
-            <Plus className="h-4 w-4" /> Nova gerência
-          </Button>
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4" /> Importar CDs
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => setDialog({ kind: "management_unit" })}>
+              <Plus className="h-4 w-4" /> Nova gerência
+            </Button>
+          </div>
         </RequirePermission>
       </div>
 
@@ -116,6 +123,7 @@ export function HierarchyTree() {
       )}
 
       <CreateHierarchyNodeDialog dialog={dialog} onClose={() => setDialog(null)} onSubmit={handleCreate} />
+      <ImportCdsDialog open={importOpen} onClose={() => setImportOpen(false)} onImported={reload} />
     </div>
   );
 }

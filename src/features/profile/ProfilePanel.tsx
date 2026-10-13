@@ -1,5 +1,5 @@
-import { useRef, useState, type ChangeEvent } from "react";
-import { Camera, Loader2, MessageCircle, Upload, Video } from "lucide-react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
+import { Briefcase, Building2, Camera, Loader2, MessageCircle, Upload, Video } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import {
   setCoverPreset,
@@ -8,7 +8,7 @@ import {
   uploadCoverPhoto,
 } from "@/repositories/profileRepository";
 import { COVER_PRESETS, coverPresetId } from "@/features/profile/coverPresets";
-import { ROLE_LABELS } from "@/permissions/types";
+import { fetchOrgHierarchySnapshot, resolveProfileOrgContext } from "@/features/profile/orgContext";
 import { useToast } from "@/components/ui/toast-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -41,13 +41,14 @@ function splitName(fullName: string): { first: string; last: string } {
 }
 
 export function ProfilePanel() {
-  const { profile, roles, refresh } = useAuth();
+  const { profile, refresh } = useAuth();
   const { toast } = useToast();
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState<string | null>(null);
   const [coverMenuOpen, setCoverMenuOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const [orgInfo, setOrgInfo] = useState<{ cdName: string | null; setorName: string | null } | null>(null);
   const [savingName, setSavingName] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
 
@@ -57,6 +58,26 @@ export function ProfilePanel() {
   const [teamsUrl, setTeamsUrl] = useState(profile?.teams_url ?? "");
   const [whatsappNumber, setWhatsappNumber] = useState(profile?.whatsapp_number ?? "");
   const [birthday, setBirthday] = useState(profile?.birthday ?? "");
+
+  useEffect(() => {
+    if (!profile) return;
+    let cancelled = false;
+    fetchOrgHierarchySnapshot()
+      .then((snapshot) => {
+        if (cancelled) return;
+        const { cdName, setorName } = resolveProfileOrgContext(
+          { id: profile.id, primary_team_id: profile.primary_team_id },
+          snapshot,
+        );
+        setOrgInfo({ cdName, setorName });
+      })
+      .catch(() => {
+        if (!cancelled) setOrgInfo({ cdName: null, setorName: null });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [profile]);
 
   function validateImage(file: File): boolean {
     if (!file.type.startsWith("image/")) {
@@ -179,7 +200,7 @@ export function ProfilePanel() {
     <div className="space-y-5">
       <div className="neu-surface neu-fade-up overflow-hidden">
         <div
-          className="neu-sunken relative h-20 bg-cover bg-center sm:h-24"
+          className="neu-sunken relative h-48 bg-cover bg-center sm:h-64"
           style={{
             backgroundImage: activePreset
               ? activePreset.gradient
@@ -278,14 +299,20 @@ export function ProfilePanel() {
             <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-2">
-            {roles.length === 0 && <Badge variant="secondary">Sem papel atribuído</Badge>}
-            {roles.map((r) => (
-              <Badge key={`${r.roleId}-${r.scopeId ?? "global"}`} variant="outline">
-                {ROLE_LABELS[r.key]}
-              </Badge>
-            ))}
-          </div>
+          {(orgInfo?.cdName || orgInfo?.setorName) && (
+            <div className="flex flex-wrap justify-center gap-2">
+              {orgInfo.cdName && (
+                <Badge variant="outline" className="gap-1.5">
+                  <Building2 className="h-3 w-3" /> {orgInfo.cdName}
+                </Badge>
+              )}
+              {orgInfo.setorName && (
+                <Badge variant="outline" className="gap-1.5">
+                  <Briefcase className="h-3 w-3" /> {orgInfo.setorName}
+                </Badge>
+              )}
+            </div>
+          )}
 
           {(profile.teams_url || profile.whatsapp_number) && (
             <div className="flex gap-2">
