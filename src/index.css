@@ -476,6 +476,19 @@
     z-index: 1;
   }
 
+  /* Preset cover pattern: a proper tiled dot grid via background-size,
+     since the parent cover uses Tailwind's bg-cover (which would stretch
+     a plain inline gradient into a single blob instead of repeating it). */
+  .cover-preset-dots::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-image: radial-gradient(circle, rgba(190, 249, 27, 0.4) 1.5px, transparent 1.5px);
+    background-size: 22px 22px;
+    pointer-events: none;
+  }
+
   /* Decorative sweeping "radar" accent — a self-contained visual flourish,
      not tied to data, so it's opt-in on hero panels rather than global. */
   .neu-radar {

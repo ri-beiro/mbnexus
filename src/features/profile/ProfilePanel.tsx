@@ -200,7 +200,7 @@ export function ProfilePanel() {
     <div className="space-y-5">
       <div className="neu-surface neu-fade-up overflow-hidden">
         <div
-          className="neu-sunken relative h-48 bg-cover bg-center sm:h-64"
+          className={cn("neu-sunken relative h-48 overflow-hidden bg-cover bg-center sm:h-64", activePreset?.patternClass)}
           style={{
             backgroundImage: activePreset
               ? activePreset.gradient
@@ -214,7 +214,7 @@ export function ProfilePanel() {
               <button
                 type="button"
                 aria-label="Alterar capa"
-                className="neu-surface-sm neu-surface-hover absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center text-[var(--neu-text-secondary)]"
+                className="neu-surface-sm neu-surface-hover absolute bottom-3 right-3 z-10 flex h-9 w-9 items-center justify-center text-[var(--neu-text-secondary)]"
               >
                 {uploadingCover || applyingPreset ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -248,8 +248,9 @@ export function ProfilePanel() {
                       handlePickPreset(preset.id);
                     }}
                     className={cn(
-                      "h-9 rounded-lg border-2 transition-transform hover:scale-105",
+                      "relative h-9 overflow-hidden rounded-lg border-2 transition-transform hover:scale-105",
                       activePreset?.id === preset.id ? "border-[var(--neu-lime-solid)]" : "border-transparent",
+                      preset.patternClass,
                     )}
                     style={{ backgroundImage: preset.gradient }}
                   />
