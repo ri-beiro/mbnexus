@@ -56,34 +56,39 @@ function CardAssignees({ profiles, assigneeIds }: { profiles: Profile[]; assigne
   );
 }
 
-/** The card face shared by the sortable card and its DragOverlay clone —
- * Trello's own anatomy: a colored label pill, title, optional description
- * marker, then a bottom row with due date on the left and avatars on the
- * right. */
+const FLAGGED_PRIORITIES = new Set(["alta", "urgente", "critica"]);
+
+/** The card face shared by the sortable card and its DragOverlay clone.
+ * Title leads and carries the most weight; priority only earns its own
+ * line when it's actually worth flagging (alta/urgente/crítica) instead of
+ * a loud filled pill on every card — the card's top accent bar already
+ * carries priority at a glance without taking up content space. */
 function CardFace({ task, profiles }: { task: TaskListRow; profiles: Profile[] }) {
   const today = new Date().toISOString().slice(0, 10);
   const dueLabel = formatDueDateLabel(task.due_date, task.status, today);
   const isOverdueOrToday = task.due_date !== null && task.status !== "concluido" && task.due_date <= today;
+  const accent = PRIORITY_ACCENT_COLOR[task.priority];
+  const showPriority = FLAGGED_PRIORITIES.has(task.priority);
 
   return (
-    <div className="space-y-2">
-      <span
-        className="inline-flex items-center rounded-md px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[.04em]"
-        style={{ backgroundColor: `color-mix(in srgb, ${PRIORITY_ACCENT_COLOR[task.priority]} 22%, transparent)`, color: PRIORITY_ACCENT_COLOR[task.priority] }}
-      >
-        {PRIORITY_LABELS[task.priority]}
-      </span>
+    <div className="space-y-1.5">
+      {showPriority && (
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[.06em]" style={{ color: accent }}>
+          <span className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: accent }} />
+          {PRIORITY_LABELS[task.priority]}
+        </div>
+      )}
 
-      <p className="text-sm font-medium leading-snug">{task.title}</p>
+      <p className="text-[13.5px] font-semibold leading-snug text-foreground">{task.title}</p>
 
-      {task.project_name && <p className="truncate text-xs text-muted-foreground">{task.project_name}</p>}
+      {task.project_name && <p className="truncate text-[11px] text-muted-foreground">{task.project_name}</p>}
 
-      <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between gap-2 pt-0.5">
+        <div className="flex min-w-0 items-center gap-2.5 text-[11px]">
           {dueLabel && (
             <span
               className={cn(
-                "neu-sunken rounded-full px-2 py-0.5 text-[10px] font-medium",
+                "flex items-center gap-1 font-medium",
                 isOverdueOrToday ? "text-[var(--neu-error-text)]" : "text-muted-foreground",
               )}
             >
@@ -128,7 +133,7 @@ function KanbanCard({
         borderTopColor: PRIORITY_ACCENT_COLOR[task.priority],
       }}
       className={cn(
-        "neu-surface-sm neu-surface-hover neu-fade-up cursor-grab rounded-xl border-t-[3px] p-3 text-sm active:cursor-grabbing",
+        "kanban-card neu-fade-up cursor-grab border-t-[3px] p-3 text-sm active:cursor-grabbing",
         isDragging && "opacity-40",
       )}
       {...attributes}
@@ -143,7 +148,7 @@ function KanbanCard({
           onPointerDown={(e) => e.stopPropagation()}
           onClick={onCardClick}
           aria-label={`Ver detalhes de ${task.title}`}
-          className="shrink-0 text-muted-foreground hover:text-[var(--neu-lime-solid)]"
+          className="shrink-0 rounded-full p-0.5 text-muted-foreground transition-colors hover:text-[var(--neu-lime-solid)]"
         >
           <Info className="h-3.5 w-3.5" />
         </button>
@@ -158,7 +163,7 @@ function KanbanCard({
         value={task.status}
         onPointerDown={(e) => e.stopPropagation()}
         onChange={(e) => onStatusChange(e.target.value as TaskStatus)}
-        className="neu-select mt-2 h-7 w-full rounded-full border-0 bg-black/10 px-2.5 text-[11px] text-muted-foreground outline-none focus-visible:neu-focus dark:bg-white/5"
+        className="neu-select mt-2.5 h-7 w-full rounded-full border-0 bg-black/15 px-2.5 text-[11px] text-muted-foreground outline-none focus-visible:neu-focus dark:bg-white/10"
       >
         {STATUS_ORDER.map((status) => (
           <option key={status} value={status}>
@@ -191,12 +196,15 @@ function KanbanColumn({
     <div
       ref={setNodeRef}
       data-testid={`kanban-column-${status}`}
-      className={cn("neu-sunken flex w-72 shrink-0 flex-col gap-2 rounded-2xl p-2.5", isOver && "neu-focus")}
+      className={cn(
+        "kanban-column flex w-[280px] shrink-0 flex-col gap-2 p-2.5 transition-shadow",
+        isOver && "ring-2 ring-[rgba(190,249,27,0.5)] ring-inset",
+      )}
     >
-      <div className="flex items-center justify-between px-1.5 pt-0.5">
-        <h3 className="text-[11px] font-semibold uppercase tracking-[.1em] text-[var(--neu-text-label)]">{STATUS_LABELS[status]}</h3>
+      <div className="flex items-center justify-between px-1.5 pb-1 pt-1">
+        <h3 className="text-[11px] font-bold uppercase tracking-[.1em] text-[var(--neu-text-secondary)]">{STATUS_LABELS[status]}</h3>
         <div className="flex items-center gap-1.5">
-          <span className="neu-surface-sm flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 font-mono text-[10px] text-muted-foreground">
+          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-black/15 px-1.5 font-mono text-[10px] text-muted-foreground dark:bg-white/10">
             {tasks.length}
           </span>
           <button
@@ -213,7 +221,7 @@ function KanbanColumn({
       <SortableContext items={tasks.map((t) => t.id)} strategy={verticalListSortingStrategy}>
         <div className="flex max-h-[calc(100vh-20rem)] flex-col gap-2 overflow-y-auto px-0.5 py-0.5">
           {tasks.length === 0 && (
-            <p className="neu-divider rounded-xl border border-dashed p-3 text-center text-xs text-muted-foreground">
+            <p className="rounded-xl border border-dashed border-[var(--kanban-card-border)] p-3 text-center text-xs text-muted-foreground">
               Sem tarefas nesta coluna.
             </p>
           )}
@@ -295,7 +303,7 @@ export function KanbanBoard({ tasks, profiles, onStatusChange, onMove, onCardCli
       <DragOverlay>
         {activeTask && (
           <div
-            className="neu-surface-sm w-72 rounded-xl border-t-[3px] p-3 text-sm shadow-xl"
+            className="kanban-card w-[280px] rotate-[1.5deg] border-t-[3px] p-3 text-sm"
             style={{ borderTopColor: PRIORITY_ACCENT_COLOR[activeTask.priority] }}
           >
             <CardFace task={activeTask} profiles={profiles} />
