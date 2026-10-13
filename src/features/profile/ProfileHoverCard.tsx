@@ -1,6 +1,9 @@
-import { MessageCircle, Video } from "lucide-react";
+import { useState } from "react";
+import { Briefcase, MessageCircle, UserCheck, Video } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { fetchOrgHierarchySnapshot, resolveProfileOrgContext } from "@/features/profile/orgContext";
+import { getProfile } from "@/repositories/profileRepository";
 import { cn } from "@/lib/utils";
 
 export interface HoverableProfile {
@@ -11,6 +14,7 @@ export interface HoverableProfile {
   avatar_url: string | null;
   teams_url: string | null;
   whatsapp_number: string | null;
+  primary_team_id: string | null;
 }
 
 function initials(name: string): string {
@@ -32,11 +36,30 @@ interface ProfileHoverCardProps {
 }
 
 /** Wraps an avatar trigger with a Teams-presence-style mini contact card
- * shown on hover, so coworkers can reach someone's Teams/WhatsApp without
- * opening their full profile. */
+ * shown on hover, so coworkers can reach someone's Teams/WhatsApp — and see
+ * their CD and who they report to — without opening their full profile. */
 export function ProfileHoverCard({ profile, children }: ProfileHoverCardProps) {
+  const [orgInfo, setOrgInfo] = useState<{ cdName: string | null; reportsToName: string | null } | null>(null);
+  const [loadedForId, setLoadedForId] = useState<string | null>(null);
+
+  async function loadOrgInfo() {
+    if (loadedForId === profile.id) return;
+    setLoadedForId(profile.id);
+    try {
+      const snapshot = await fetchOrgHierarchySnapshot();
+      const { cdName, reportsToProfileId } = resolveProfileOrgContext(
+        { id: profile.id, primary_team_id: profile.primary_team_id },
+        snapshot,
+      );
+      const reportsTo = reportsToProfileId ? await getProfile(reportsToProfileId) : null;
+      setOrgInfo({ cdName, reportsToName: reportsTo?.full_name ?? null });
+    } catch {
+      setOrgInfo({ cdName: null, reportsToName: null });
+    }
+  }
+
   return (
-    <HoverCard openDelay={150} closeDelay={100}>
+    <HoverCard openDelay={150} closeDelay={100} onOpenChange={(open) => open && loadOrgInfo()}>
       <HoverCardTrigger asChild>{children}</HoverCardTrigger>
       <HoverCardContent>
         <div className="flex items-center gap-3">
@@ -50,6 +73,21 @@ export function ProfileHoverCard({ profile, children }: ProfileHoverCardProps) {
             <p className="truncate text-xs text-muted-foreground">{profile.email}</p>
           </div>
         </div>
+
+        {(orgInfo?.cdName || orgInfo?.reportsToName) && (
+          <div className="mt-3 space-y-1 border-t border-[var(--neu-divider)] pt-3 text-xs">
+            {orgInfo.cdName && (
+              <p className="flex items-center gap-1.5 text-muted-foreground">
+                <Briefcase className="h-3.5 w-3.5 shrink-0" /> {orgInfo.cdName}
+              </p>
+            )}
+            {orgInfo.reportsToName && (
+              <p className="flex items-center gap-1.5 text-muted-foreground">
+                <UserCheck className="h-3.5 w-3.5 shrink-0" /> Responde a {orgInfo.reportsToName}
+              </p>
+            )}
+          </div>
+        )}
 
         {(profile.teams_url || profile.whatsapp_number) && (
           <div className="mt-3 flex gap-2 border-t border-[var(--neu-divider)] pt-3">

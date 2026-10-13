@@ -149,12 +149,13 @@ describe("ProfilePanel", () => {
     await waitFor(() => expect(refresh).toHaveBeenCalled());
   });
 
-  it("picks a preset cover and refreshes the profile", async () => {
+  it("picks a preset cover from the cover menu and refreshes the profile", async () => {
     const user = userEvent.setup();
     const refresh = setAuth(makeProfile());
     renderPanel();
 
-    await user.click(screen.getByRole("button", { name: /navy profundo/i }));
+    await user.click(screen.getByRole("button", { name: /alterar capa/i }));
+    await user.click(await screen.findByRole("button", { name: /navy profundo/i }));
 
     await waitFor(() => expect(mockSetCoverPreset).toHaveBeenCalledWith("user-1", "deep-navy"));
     await waitFor(() => expect(refresh).toHaveBeenCalled());

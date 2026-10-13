@@ -1,5 +1,5 @@
-import { useState, type ChangeEvent } from "react";
-import { Camera, Loader2 } from "lucide-react";
+import { useRef, useState, type ChangeEvent } from "react";
+import { Camera, Loader2, MessageCircle, Upload, Video } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import {
   setCoverPreset,
@@ -13,6 +13,13 @@ import { useToast } from "@/components/ui/toast-provider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -39,6 +46,8 @@ export function ProfilePanel() {
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [applyingPreset, setApplyingPreset] = useState<string | null>(null);
+  const [coverMenuOpen, setCoverMenuOpen] = useState(false);
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [savingName, setSavingName] = useState(false);
   const [savingContact, setSavingContact] = useState(false);
 
@@ -170,7 +179,7 @@ export function ProfilePanel() {
     <div className="space-y-5">
       <div className="neu-surface neu-fade-up overflow-hidden">
         <div
-          className="neu-sunken relative h-36 bg-cover bg-center sm:h-48"
+          className="neu-sunken relative h-20 bg-cover bg-center sm:h-24"
           style={{
             backgroundImage: activePreset
               ? activePreset.gradient
@@ -179,14 +188,56 @@ export function ProfilePanel() {
                 : undefined,
           }}
         >
-          <label
-            htmlFor="profile-cover-upload"
-            className="neu-surface-sm neu-surface-hover absolute bottom-3 right-3 flex h-9 w-9 cursor-pointer items-center justify-center text-[var(--neu-text-secondary)]"
-          >
-            {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
-          </label>
+          <DropdownMenu open={coverMenuOpen} onOpenChange={setCoverMenuOpen}>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label="Alterar capa"
+                className="neu-surface-sm neu-surface-hover absolute bottom-3 right-3 flex h-9 w-9 items-center justify-center text-[var(--neu-text-secondary)]"
+              >
+                {uploadingCover || applyingPreset ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Camera className="h-4 w-4" />
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64">
+              <DropdownMenuItem
+                onClick={() => {
+                  setCoverMenuOpen(false);
+                  coverInputRef.current?.click();
+                }}
+              >
+                <Upload className="mr-2 h-4 w-4" /> Enviar capa
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <p className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[.1em] text-[var(--neu-text-label)]">
+                Capas do sistema
+              </p>
+              <div className="grid grid-cols-3 gap-2 p-2 pt-1">
+                {COVER_PRESETS.map((preset) => (
+                  <button
+                    key={preset.id}
+                    type="button"
+                    aria-label={preset.label}
+                    title={preset.label}
+                    onClick={() => {
+                      setCoverMenuOpen(false);
+                      handlePickPreset(preset.id);
+                    }}
+                    className={cn(
+                      "h-9 rounded-lg border-2 transition-transform hover:scale-105",
+                      activePreset?.id === preset.id ? "border-[var(--neu-lime-solid)]" : "border-transparent",
+                    )}
+                    style={{ backgroundImage: preset.gradient }}
+                  />
+                ))}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <input
-            id="profile-cover-upload"
+            ref={coverInputRef}
             type="file"
             accept="image/*"
             className="sr-only"
@@ -196,8 +247,8 @@ export function ProfilePanel() {
           />
         </div>
 
-        <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-end sm:gap-5">
-          <div className="relative -mt-16 shrink-0 sm:-mt-20">
+        <div className="flex flex-col items-center gap-3 px-5 pb-6 text-center">
+          <div className="relative -mt-10 shrink-0 sm:-mt-12">
             <Avatar className="neu-surface-sm h-20 w-20 border-4 border-[var(--neu-surface-from)] sm:h-24 sm:w-24">
               {profile.avatar_url && <AvatarImage src={profile.avatar_url} alt={profile.full_name} />}
               <AvatarFallback className="text-lg">{initials(profile.full_name)}</AvatarFallback>
@@ -221,45 +272,47 @@ export function ProfilePanel() {
             />
           </div>
 
-          <div className="min-w-0 flex-1 space-y-2">
-            <div>
-              <p className="truncate text-base font-semibold">{profile.full_name}</p>
-              <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {roles.length === 0 && <Badge variant="secondary">Sem papel atribuído</Badge>}
-              {roles.map((r) => (
-                <Badge key={`${r.roleId}-${r.scopeId ?? "global"}`} variant="outline">
-                  {ROLE_LABELS[r.key]}
-                </Badge>
-              ))}
-            </div>
+          <div className="min-w-0">
+            <p className="truncate text-base font-semibold">{profile.full_name}</p>
+            {profile.job_title && <p className="truncate text-sm text-muted-foreground">{profile.job_title}</p>}
+            <p className="truncate text-sm text-muted-foreground">{profile.email}</p>
           </div>
-        </div>
 
-        <div className="space-y-2 border-t border-[var(--neu-divider)] p-5">
-          <p className="text-[10px] font-semibold uppercase tracking-[.12em] text-[var(--neu-text-label)]">
-            Capas pré-carregadas
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {COVER_PRESETS.map((preset) => (
-              <button
-                key={preset.id}
-                type="button"
-                aria-label={preset.label}
-                title={preset.label}
-                disabled={applyingPreset !== null}
-                onClick={() => handlePickPreset(preset.id)}
-                className={cn(
-                  "h-9 w-14 shrink-0 rounded-xl border-2 transition-transform hover:scale-105",
-                  activePreset?.id === preset.id ? "border-[var(--neu-lime-solid)]" : "border-transparent",
-                )}
-                style={{ backgroundImage: preset.gradient }}
-              >
-                {applyingPreset === preset.id && <Loader2 className="mx-auto h-3.5 w-3.5 animate-spin text-white" />}
-              </button>
+          <div className="flex flex-wrap justify-center gap-2">
+            {roles.length === 0 && <Badge variant="secondary">Sem papel atribuído</Badge>}
+            {roles.map((r) => (
+              <Badge key={`${r.roleId}-${r.scopeId ?? "global"}`} variant="outline">
+                {ROLE_LABELS[r.key]}
+              </Badge>
             ))}
           </div>
+
+          {(profile.teams_url || profile.whatsapp_number) && (
+            <div className="flex gap-2">
+              {profile.teams_url && (
+                <a
+                  href={profile.teams_url}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Abrir Teams"
+                  className="neu-sunken neu-surface-hover flex h-9 w-9 items-center justify-center text-[var(--neu-text-secondary)] hover:text-[var(--neu-lime-solid)]"
+                >
+                  <Video className="h-4 w-4" />
+                </a>
+              )}
+              {profile.whatsapp_number && (
+                <a
+                  href={`https://wa.me/${profile.whatsapp_number.replace(/[^\d]/g, "")}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label="Abrir WhatsApp"
+                  className="neu-sunken neu-surface-hover flex h-9 w-9 items-center justify-center text-[var(--neu-text-secondary)] hover:text-[var(--neu-lime-solid)]"
+                >
+                  <MessageCircle className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
