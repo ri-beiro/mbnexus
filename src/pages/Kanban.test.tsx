@@ -105,13 +105,13 @@ describe("Kanban page", () => {
     await waitFor(() => expect(mockUpdateTask).toHaveBeenCalledWith("1", { status: "concluido" }));
   });
 
-  it("opens the task detail dialog when a card's details button is clicked", async () => {
+  it("opens the task detail panel when a card is clicked", async () => {
     const user = userEvent.setup();
     mockListTasks.mockResolvedValue([makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })]);
 
     renderPage();
     const card = (await screen.findByText("Corrigir bug")).closest("[data-kanban-card]") as HTMLElement;
-    await user.click(within(card).getByRole("button", { name: /ver detalhes de corrigir bug/i }));
+    await user.click(card);
 
     const dialog = await screen.findByRole("dialog");
     expect(within(dialog).getByText("Corrigir bug")).toBeInTheDocument();

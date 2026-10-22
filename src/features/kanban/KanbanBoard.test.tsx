@@ -1,7 +1,7 @@
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { KanbanBoard } from "@/features/tasks/KanbanBoard";
+import { KanbanBoard } from "@/features/kanban/KanbanBoard";
 import { STATUS_LABELS } from "@/features/tasks/taskLabels";
 import type { TaskListRow } from "@/repositories/taskRepository";
 
@@ -71,16 +71,29 @@ describe("KanbanBoard", () => {
     expect(onStatusChange).toHaveBeenCalledWith("1", "concluido");
   });
 
-  it("calls onCardClick with the task id when a card's details button is clicked", async () => {
+  it("calls onCardClick with the task id when the card itself is clicked", async () => {
     const user = userEvent.setup();
     const onCardClick = vi.fn();
     const tasks = [makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })];
     render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={onCardClick} onAddCard={vi.fn()} onMove={vi.fn()} />);
 
     const card = screen.getByText("Corrigir bug").closest("[data-kanban-card]") as HTMLElement;
-    await user.click(within(card).getByRole("button", { name: /ver detalhes de corrigir bug/i }));
+    await user.click(card);
 
     expect(onCardClick).toHaveBeenCalledWith("1");
+  });
+
+  it("does not call onCardClick when the status select itself is clicked", async () => {
+    const user = userEvent.setup();
+    const onCardClick = vi.fn();
+    const tasks = [makeRow({ id: "1", title: "Corrigir bug", status: "a_fazer" })];
+    render(<KanbanBoard tasks={tasks} profiles={[]} onStatusChange={vi.fn()} onCardClick={onCardClick} onAddCard={vi.fn()} onMove={vi.fn()} />);
+
+    const card = screen.getByText("Corrigir bug").closest("[data-kanban-card]") as HTMLElement;
+    const select = within(card).getByLabelText(/status da tarefa/i);
+    await user.click(select);
+
+    expect(onCardClick).not.toHaveBeenCalled();
   });
 
   it("calls onAddCard with the column's status when its add-card button is clicked", async () => {

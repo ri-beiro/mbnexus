@@ -190,7 +190,7 @@ Cobertura atual (305 testes):
   `src/pages/Projects.test.tsx` e `src/features/projects/ProjectDetailPanel.test.tsx`
   — comportamento de UI (filtros, criação rápida, edição inline de status,
   subtarefas/fases, comentários, responsáveis/membros) com Testing Library.
-- `src/features/tasks/kanbanLogic.test.ts`, `src/features/tasks/KanbanBoard.test.tsx`
+- `src/features/kanban/kanbanLogic.test.ts`, `src/features/kanban/KanbanBoard.test.tsx`
   e `src/pages/Kanban.test.tsx` — agrupamento por coluna e mudança de status
   testados via um `<select>` acessível em cada card (o arrastar-e-soltar em
   si com dnd-kit é um teste manual/visual — simular a física real de um

@@ -4,7 +4,7 @@ import {
   groupTasksByStatus,
   moveTaskToStatus,
   sortTasksByBoardPosition,
-} from "@/features/tasks/kanbanLogic";
+} from "@/features/kanban/kanbanLogic";
 import { STATUS_ORDER } from "@/features/tasks/taskLabels";
 import type { TaskStatus } from "@/types/database";
 

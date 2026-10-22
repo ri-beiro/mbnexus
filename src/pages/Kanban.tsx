@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { LayoutGrid, Plus, Search, X } from "lucide-react";
 import { useAuth } from "@/features/auth/useAuth";
 import { useTasksData } from "@/features/tasks/useTasksData";
-import { KanbanBoard } from "@/features/tasks/KanbanBoard";
+import { KanbanBoard } from "@/features/kanban/KanbanBoard";
 import { CreateTaskDialog } from "@/features/tasks/CreateTaskDialog";
 import { TaskDetailPanel } from "@/features/tasks/TaskDetailPanel";
 import { filterTasks } from "@/features/tasks/taskLogic";
